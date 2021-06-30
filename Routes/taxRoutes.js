@@ -8,23 +8,29 @@ const { paymentValidator } = require('../Middleware/paymentValidation');
 
 const {
     getUserList,
+    getTelephoneNum,
     signupNewUser,
     login,
     payment,
     getActivityList,
-    getCommuneList } = require('../Controller/userController')
+    getCommuneList,
+    getCommuneInfo } = require('../Controller/userController')
 
 router.get("/users", debug, getUserList);
 
+router.get("/telephone/:id", getTelephoneNum)
+
 router.post("/signup", signupUserValidator, signupNewUser);
 
-router.get("/activity", debug, getActivityList);
+router.get("/activities", debug, getActivityList);
 
-router.get("/commune", getCommuneList);
+router.get("/communes", getCommuneList);
 
 router.post("/login", debug, loginUserValidator, login);
 
 router.post("/payment", paymentValidator, payment);
+
+router.get("/commune/:id", getCommuneInfo)  //****** */ NOT WORKING WORK ON IT 
 
 router.all("*", (req, res) => {
     res.status(404).json({

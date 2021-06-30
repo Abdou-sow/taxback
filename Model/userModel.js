@@ -16,7 +16,8 @@ const userSchema = new Schema(
         commune: { type: String, require: true },
         communeID: { type: String, require: true },
         telephone: { type: Number, unique: true, require: true },
-        password: { type: String, require: true, min: 6, max: 15 }
+        password: { type: String, require: true, min: 6, max: 15 },
+        created: { type: Date, default: Date.now }
     }
 );
 

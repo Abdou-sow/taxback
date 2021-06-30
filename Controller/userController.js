@@ -36,6 +36,40 @@ const getUserList = (async (req, res) => {
     }
 })
 
+const getTelephoneNum = (async (req, res) => {
+
+    console.log("Im in getTelephoneNum", req.params.id)
+
+    try {
+
+        const telephoneExist = await userModel.findOne({ telephone: req.params.id }).lean()
+        console.log("userfound", telephoneExist)
+
+        if(telephoneExist) {
+
+            res.json({
+                message: "User Found",
+                telephoneExist
+            })
+        } else {
+
+            res.json({
+                message: "User not found",
+                telephoneExist
+
+            })
+        }
+        
+    } catch (error) {
+        console.log("Error while verifing the user telephone number")
+
+        res.json({
+            message: "Error while verifing the user telephone number",
+            error
+        })
+    }
+})
+
 const getActivityList = (async (req, res) => {
 
     console.log("Im in getActivityList", req.body)
@@ -45,10 +79,10 @@ const getActivityList = (async (req, res) => {
 
         res.json({
             message: "List of activity currently available in database",
-            activityList
+            list
 
         })
-        
+
     } catch (error) {
         console.log("Error while getting data for activity")
 
@@ -68,10 +102,10 @@ const getCommuneList = (async (req, res) => {
 
         res.json({
             message: "List of Commune currently available in database",
-            communeList
+            list
 
         })
-        
+
     } catch (error) {
         console.log("Error while getting data for Commune")
 
@@ -216,116 +250,145 @@ const signupNewUser = (async (req, res, next) => {
     }
 })
 
-const login = ( async (req, res) => {
+const login = (async (req, res) => {
 
-        console.log("Im in login route")
+    console.log("Im in login route")
 
-        const tokenExpire = "300s"      // token expires in 300s(5 minutes)
+    const tokenExpire = "300s"      // token expires in 300s(5 minutes)
 
-        // console.log("req.body", req.body)
+    // console.log("req.body", req.body)
 
-        const userTelephone = req.body.telephone
-        const userPassword = req.body.password
+    const userTelephone = req.body.telephone
+    const userPassword = req.body.password
 
-        try {
+    try {
 
-            console.log("req.body", req.body)
+        console.log("req.body", req.body)
 
-            // const passwordHash = bcrypt.hashSync(userPassword);
+        // const passwordHash = bcrypt.hashSync(userPassword);
 
-            // console.log("passwordHash", passwordHash)
+        // console.log("passwordHash", passwordHash)
 
-            const telephoneExist = await userModel.findOne({ telephone: userTelephone })
+        const telephoneExist = await userModel.findOne({ telephone: userTelephone })
 
-            const validPassword = bcrypt.compareSync(userPassword, telephoneExist.password)
+        const validPassword = bcrypt.compareSync(userPassword, telephoneExist.password)
 
-            // console.log("telephoneExist.password", telephoneExist.password)
+        // console.log("telephoneExist.password", telephoneExist.password)
 
-            console.log("validPassword", validPassword)
+        console.log("validPassword", validPassword)
 
-            if (validPassword) {
+        if (validPassword) {
 
-                const validToken = await jwt.sign({     // creates token using jwt with "secret" code and time to expires the token
-                    id: telephoneExist.id
-                }, "secret", {
-                    expiresIn: tokenExpire       // token expiry time mentioned in const above
-                })
+            const validToken = await jwt.sign({     // creates token using jwt with "secret" code and time to expires the token
+                id: telephoneExist.id
+            }, "secret", {
+                expiresIn: tokenExpire       // token expiry time mentioned in const above
+            })
 
-                res.json({
-                    message: `${telephoneExist.surname}, ${userTelephone} is logged in`,
-                    telephoneExist,
-                    validToken,
-                    tokenExpire
-                })
-
-            } else {
-                res.json({
-
-                    message: `User ${userTelephone} login problem`
-
-                })
-            }
-        } catch (error) {
-            console.error("Error in login", error)
             res.json({
-                message: `Error while login with user ${userTelephone}`,
-                error
+                message: `${telephoneExist.surname}, ${userTelephone} is logged in`,
+                telephoneExist,
+                validToken,
+                tokenExpire
+            })
+
+        } else {
+            res.json({
+
+                message: `User ${userTelephone} login problem`
+
             })
         }
+    } catch (error) {
+        console.error("Error in login", error)
+        res.json({
+            message: `Error while login with user ${userTelephone}`,
+            error
+        })
     }
-)
+})
 
-const payment = ( async (req, res) => {
+const payment = (async (req, res) => {
 
-        console.log("Im in payment route")
-        // const userPaymentDetail = req.body;
+    console.log("Im in payment route")
+    // const userPaymentDetail = req.body;
 
-        const userTelephone = req.body.telephone;
-        const userAmount = req.body.amount;
+    const userTelephone = req.body.telephone;
+    const userAmount = req.body.amount;
 
-        try {
+    try {
 
-            const userInfo = await userModel.findOne({ telephone: userTelephone })
+        const userInfo = await userModel.findOne({ telephone: userTelephone })
 
-                // pick user information from collection
-            if (userInfo) {
+        // pick user information from collection
+        if (userInfo) {
 
-                console.log("User, Commune and Activity Commune", userInfo.telephone, userInfo.communeID, userInfo.activityID);
+            console.log("User, Commune and Activity Commune", userInfo.telephone, userInfo.communeID, userInfo.activityID);
 
-                // add new payment 
-                const addPayment = await paymentModel.create(
-                    {
-                        telephone: userTelephone,
-                        communeID: userInfo.communeID,
-                        activityID: userInfo.activityID,
-                        amount: userAmount
-                    })
-
-                    res.json({
-                        message: "Payment added successfully",
-                        addPayment,
-                        userInfo
-                    })
-
-            } else {
-
-                res.json({
-                    message: "User is not registered or user information not available, payment cancelled",
-                    userInfo
+            // add new payment 
+            const addPayment = await paymentModel.create(
+                {
+                    telephone: userTelephone,
+                    communeID: userInfo.communeID,
+                    activityID: userInfo.activityID,
+                    amount: userAmount
                 })
-            }
 
-        } catch (error) {
-            console.log("Error while making payment", error)
+            res.json({
+                message: "Payment added successfully",
+                addPayment,
+                userInfo
+            })
+
+        } else {
+
+            res.json({
+                message: "User is not registered or user information not available, payment cancelled",
+                userInfo
+            })
         }
+
+    } catch (error) {
+        console.log("Error while making payment", error)
     }
-)
+})
+
+// NOT WORKING COMPLETE THE CODE
+const getCommuneInfo = (async (req, res) => {
+
+    console.log("Im in getCommuneInfo", req.query.params)
+    const userCommune = req.body;
+
+    try {
+
+        const communeInfo = await communeModel.findOne({ name: userCommune })
+
+        console.log("communeInfo", communeInfo)
+        console.log("communeInfo", communeInfo._id)
+
+        res.json({
+            message: "List of community information available for**** ",
+            communeInfo
+
+        })
+
+    } catch (error) {
+        console.log("Error while getting data for activity", error)
+
+        res.json({
+            message: "Error while getting data for activity",
+            error
+        })
+    }
+})
 
 module.exports = {
     getUserList,
+    getTelephoneNum,
     signupNewUser,
     login,
     payment,
     getActivityList,
-    getCommuneList
+    getCommuneList,
+    getCommuneInfo
 }

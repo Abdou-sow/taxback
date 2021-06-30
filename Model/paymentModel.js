@@ -9,6 +9,7 @@ const paymentSchema = new Schema(
         activityID: { type: String, require: true },
         date: { type: Date, efault: Date.now },
         amount: { type: Number, require: true },
+        created: { type: Date, default: Date.now }
     }
 );
 

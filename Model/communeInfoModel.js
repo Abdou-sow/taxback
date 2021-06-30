@@ -8,7 +8,8 @@ const communeInfoSchema = new Schema(
         date: { type: Date, require: true },
         travaux: { type: String },
         place: { type: String },
-        amount_spent: { type: Number, require: true }
+        amount_spent: { type: Number, require: true },
+        created: { type: Date, default: Date.now }
     }
 );
 

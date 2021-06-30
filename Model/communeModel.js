@@ -5,7 +5,8 @@ const Schema = mongoose.Schema;
 const communeSchema = new Schema(
     {
         name: { type: String, require: true },
-        codepostal: { type: Number }
+        codepostal: { type: Number },
+        created: { type: Date, default: Date.now }
     }
 );
 
