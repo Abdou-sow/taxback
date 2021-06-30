@@ -12,9 +12,7 @@ const communeModel = require('../Model/communeModel');
 const communeInfoModel = require('../Model/communeInfoModel');
 const paymentModel = require('../Model/paymentModel');
 
-const { debug } = require('../Middleware/debug');
-
-const getUserList = (debug, async (req, res) => {
+const getUserList = (async (req, res) => {
 
     console.log("En getUserList controller", req.body)
 
@@ -33,6 +31,29 @@ const getUserList = (debug, async (req, res) => {
 
         res.json({
             message: "Error en user list",
+            error
+        })
+    }
+})
+
+const getActivityList = (async (req, res) => {
+
+    console.log("Im in getActivityList", req.body)
+
+    try {
+        const activityList = await activityModel.find({})
+
+        res.json({
+            message: "List of activity currently available in database",
+            activityList
+
+        })
+        
+    } catch (error) {
+        console.log("Error while getting data for activity")
+
+        res.json({
+            message: "Error while getting data for activity",
             error
         })
     }
@@ -285,5 +306,6 @@ module.exports = {
     getUserList,
     signupNewUser,
     login,
-    payment
+    payment,
+    getActivityList
 }
