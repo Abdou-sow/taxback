@@ -59,6 +59,29 @@ const getActivityList = (async (req, res) => {
     }
 })
 
+const getCommuneList = (async (req, res) => {
+
+    console.log("Im in getCommuneList", req.body)
+
+    try {
+        const communeList = await communeModel.find({})
+
+        res.json({
+            message: "List of Commune currently available in database",
+            communeList
+
+        })
+        
+    } catch (error) {
+        console.log("Error while getting data for Commune")
+
+        res.json({
+            message: "Error while getting data for Commune",
+            error
+        })
+    }
+})
+
 const signupNewUser = (async (req, res, next) => {
 
     const errorVal = validationResult(req);
@@ -193,9 +216,7 @@ const signupNewUser = (async (req, res, next) => {
     }
 })
 
-const login = (
-
-    async (req, res) => {
+const login = ( async (req, res) => {
 
         console.log("Im in login route")
 
@@ -254,9 +275,7 @@ const login = (
     }
 )
 
-const payment = (
-
-    async (req, res) => {
+const payment = ( async (req, res) => {
 
         console.log("Im in payment route")
         // const userPaymentDetail = req.body;
@@ -307,5 +326,6 @@ module.exports = {
     signupNewUser,
     login,
     payment,
-    getActivityList
+    getActivityList,
+    getCommuneList
 }

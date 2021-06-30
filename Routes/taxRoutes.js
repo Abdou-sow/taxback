@@ -1,20 +1,26 @@
 const express = require('express')
 const router = express.Router();
 
-const  { debug } = require('../Middleware/debug')
+const { debug } = require('../Middleware/debug')
 const { signupUserValidator } = require('../Middleware/signupUserValidator')
 const { loginUserValidator } = require('../Middleware/loginUserValidator')
 const { paymentValidator } = require('../Middleware/paymentValidation');
 
-const { getUserList, signupNewUser, login, payment, getActivityList } = require('../Controller/userController')
+const {
+    getUserList,
+    signupNewUser,
+    login,
+    payment,
+    getActivityList,
+    getCommuneList } = require('../Controller/userController')
 
 router.get("/users", debug, getUserList);
 
 router.post("/signup", signupUserValidator, signupNewUser);
 
-router.post("/activity", debug, getActivityList);
+router.get("/activity", debug, getActivityList);
 
-// todo : if need add list commune route router.post("/commune", addCommune);
+router.get("/commune", getCommuneList);
 
 router.post("/login", debug, loginUserValidator, login);
 
