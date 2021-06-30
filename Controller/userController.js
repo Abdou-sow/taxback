@@ -7,7 +7,10 @@ const bcrypt = require('bcryptjs');     // to crypt sensible datas
 const jwt = require('jsonwebtoken');    // to create jsonwebtoken
 
 const userModel = require('../Model/userModel');
-const { debug } = require('../Middleware/debug')
+const activityModel = require('../Model/activityModel')
+const communeModel = require('../Model/communeModel');
+
+const { debug } = require('../Middleware/debug');
 
 const getUserList = (debug, async (req, res) => {
 
@@ -15,9 +18,12 @@ const getUserList = (debug, async (req, res) => {
 
     try {
 
-        const userlist = await userModel.find({})
+        const userlist = await userModel.find({})   
 
-        res.json(userlist)
+        res.json({
+            message: "List of users currently available in database",
+            userlist
+        })
 
     } catch (error) {
 
@@ -30,99 +36,139 @@ const getUserList = (debug, async (req, res) => {
     }
 })
 
-const signupNewUser = ( async (req, res, next) => {
+const signupNewUser = (async (req, res, next) => {
 
-        const errorVal = validationResult(req);
+    const errorVal = validationResult(req);
 
-        console.log("Im in user signup", req.body)
+    console.log("Im in user signup", req.body)
 
-        const userSurname = req.body.surname
-        const userFirstname = req.body.firstname
-        const userDateofbirth = req.body.dateofbirth
-        const userAddress_personal = req.body.address_personal
-        const userAddress_work = req.body.address_work
-        const userActivity = req.body.activity
-        const userCommune = req.body.commune
-        const userTelephone = req.body.telephone
-        const userPassword = req.body.password
+    const userSurname = req.body.surname
+    const userFirstname = req.body.firstname
+    const userDateofbirth = req.body.dateofbirth
+    const userAddress_personal = req.body.address_personal
+    const userPersonalcodepostal = req.body.personal_codepostal
+    const userAddress_Activity = req.body.address_activity
+    const userActivitycodepostal = req.body.activity_codepostal
+    const userActivity = req.body.activity
+    const userCommune = req.body.commune
+    const userTelephone = req.body.telephone
+    const userPassword = req.body.password
 
-        console.log(req.body)
+    console.log(req.body)
 
-        // const hasErrors = !errorVal.isEmpty();
+    // const hasErrors = !errorVal.isEmpty();
 
-        console.log("hasErrors:-", errorVal);
+    console.log("hasErrors:-", errorVal);
 
-        try {
+    try {
 
-            const telephoneExist = await userModel.findOne({ telephone: req.body.telephone }).lean()
-            // console.log("userfound", telephoneExist)
+        const telephoneExist = await userModel.findOne({ telephone: req.body.telephone }).lean()
+        // console.log("userfound", telephoneExist)
 
-            if (telephoneExist) {
+        if (telephoneExist) {
+
+            res.json({
+                message: `User already registered in ${userTelephone} telephone number`,
+                telephoneExist
+            })
+
+        } else {
+
+            const activityExist = await activityModel.findOne({ activity: req.body.activity }).lean()
+
+            if (!activityExist) {
+
+                const addActivity = await activityModel.create({ activity: userActivity })
+
+                console.log(`New activity "${userActivity}" is added to database`)
+
+                // res.json({
+                //     message: `New activity "${userActivity}" is added to database`,
+                //     addActivity
+                // })
+            }
+
+            const communeExist = await communeModel.findOne({ commune: req.body.commune }).lean()
+
+            if (!communeExist) {
+
+                const addCommune = await communeModel.create({ commune: userCommune, codepostal: userActivitycodepostal })
+
+                console.log(`New Commune "${addCommune}" is added to database`)
+
+                // res.json({
+                //     message: `New Commune "${addCommune}" is added to database`,
+                //     addCommune
+                // })
+            }
+
+            if (errorVal.isEmpty()) {
+
+                const activityID = await activityModel.findOne({ activity: req.body.activity }).lean()
+
+                const communeID = await communeModel.findOne({ commune: req.body.commune }).lean()
+
+                console.log("activityID", activityID)
+                console.log("communeID", communeID)
+
+                const password = bcrypt.hashSync(userPassword)       // crypts the given password in to Bearer Token
+
+                const userAdded = await userModel.create(
+                    {
+                        surname: userSurname,
+                        firstname: userFirstname,
+                        dateofbirth: userDateofbirth,
+                        address_personal: userAddress_personal,
+                        personal_codepostal: userPersonalcodepostal,
+                        address_activity: userAddress_Activity,
+                        activity_codepostal: userActivitycodepostal,
+                        activity: userActivity,
+                        activityID: activityID._id,
+                        commune: userCommune,
+                        communeID: communeID._id,
+                        telephone: userTelephone,
+                        password: password
+                    })
 
                 res.json({
-                    message: `User already registered in ${userTelephone} telephone number`,
-                    telephoneExist
+                    message: "User successfully added",
+                    userAdded
                 })
 
             } else {
 
-                if (errorVal.isEmpty()) {
+                console.log("Please verify your details matches the regulation");
 
-                    const password = bcrypt.hashSync(userPassword)       // crypts the given password in to Bearer Token
-
-                    const userAdded = await userModel.create(
-                        {
-                            surname: userSurname,
-                            firstname: userFirstname,
-                            dateofbirth: userDateofbirth,
-                            address_personal: userAddress_personal,
-                            address_work: userAddress_work,
-                            activity: userActivity,
-                            commune: userCommune,
-                            telephone: userTelephone,
-                            password: password
-                        })
-
-                    res.json({
-                        message: "User successfully added",
-                        userAdded
-                    })
-
-                } else {
-
-                    console.log("Please verify your details matches the regulation");
-
-                    res.json({
-                        message: `Error while processing your ${userTelephone} as new user`,
-                        userTelephone,
-                        errorVal
-                    })
-                }
+                res.json({
+                    message: `Error while processing your ${userTelephone} as new user`,
+                    userTelephone,
+                    errorVal
+                })
             }
-
-        } catch (error) {
-            console.error(`Error while processing your ${userTelephone} as new user`, error)
-
-            res.json({
-                message: `Error while processing your ${userTelephone} as new user`,
-                userTelephone
-            })
         }
 
-        try {
+    } catch (error) {
+        console.error(`Error while processing your ${userTelephone} as new user`, error)
 
-
-        } catch (error) {
-
-            console.log(`Error while adding new user :- ${userTelephone}`, error);
-
-            res.json({
-                message: `Error while processing your ${userTelephone} as new user`,
-                error
-            })
-        }
+        res.json({
+            message: `Error while processing your ${userTelephone} as new user`,
+            userTelephone
+        })
     }
-)
+
+    try {
+
+
+    } catch (error) {
+
+        console.log(`Error while adding new user :- ${userTelephone}`, error);
+
+        res.json({
+            message: `Error while processing your ${userTelephone} as new user`,
+            error
+        })
+    }
+})
 
 const login = (
 
@@ -130,7 +176,9 @@ const login = (
 
         console.log("Im in login route")
 
-        console.log("req.body", req.body)
+        const tokenExpire = "300s"      // token expires in 300s(5 minutes)
+
+        // console.log("req.body", req.body)
 
         const userTelephone = req.body.telephone
         const userPassword = req.body.password
@@ -138,32 +186,39 @@ const login = (
         try {
 
             console.log("req.body", req.body)
-            
+
             // const passwordHash = bcrypt.hashSync(userPassword);
-            
+
             // console.log("passwordHash", passwordHash)
-            
+
             const telephoneExist = await userModel.findOne({ telephone: userTelephone })
-            
+
             const validPassword = bcrypt.compareSync(userPassword, telephoneExist.password)
-            
-            console.log("telephoneExist.password", telephoneExist.password)
-            
+
+            // console.log("telephoneExist.password", telephoneExist.password)
+
             console.log("validPassword", validPassword)
-            
+
             if (validPassword) {
 
+                const validToken = await jwt.sign({     // creates token using jwt with "secret" code and time to expires the token
+                    id: telephoneExist.id
+                }, "secret", {
+                    expiresIn: tokenExpire       // token expiry time mentioned in const above
+                })
+    
                 res.json({
-    
-                    message: `User ${userTelephone} is logged in`
-    
+                    message: `${telephoneExist.surname}, ${userTelephone} is logged in`,
+                    telephoneExist,
+                    validToken,
+                    tokenExpire
                 })
 
             } else {
                 res.json({
-    
+
                     message: `User ${userTelephone} login problem`
-    
+
                 })
             }
         } catch (error) {
@@ -173,7 +228,8 @@ const login = (
                 error
             })
         }
-    })
+    }
+)
 
 module.exports = {
     getUserList,
