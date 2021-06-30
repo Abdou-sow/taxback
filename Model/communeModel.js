@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 // Schema for activity
 const communeSchema = new Schema(
     {
-        commune: { type: String, require: true },
+        name: { type: String, require: true },
         codepostal: { type: Number }
     }
 );

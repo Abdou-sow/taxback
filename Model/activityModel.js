@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 
 const activitySchema = new Schema(
     {
-        activity: { type: String, require: true }
+        name: { type: String, require: true }
     }
 );
 

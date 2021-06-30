@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const userModel = require('./Model/userModel');
 const Commune = require('./Model/communeModel');
 const Activity = require('./Model/activityModel');
+const CommuneInfo = require('./Model/communeInfoModel');
+const Payment = require('./Model/paymentModel');
 const bcrypt = require('bcryptjs');
 
 // connect to database
@@ -46,7 +48,7 @@ const addUser = async () => {
                 }
         ])
 
-        console.log("The collection of User are recreated with the database");
+        console.log("The collection of User has been recreated with the database");
 
     } catch (err) {
         console.log(err)
@@ -64,28 +66,12 @@ const addActivity = async () => {
         await Activity.insertMany([
 
                 {
-                    activity: "Test Activity",
+                    name: "Test Activity",
                     prix:5
-                },
-                // {
-                //     activity: "magasinier",
-                //     prix:6
-                // },
-                // {
-                //     activity: "coiffure",
-                //     prix:4
-                // },
-                // {
-                //     activity: "commercant",
-                //     prix:10
-                // },
-                // {
-                //     activity: "marchee",
-                //     prix:6
-                // }
+                }
         ])
 
-        console.log("The collection of Activity are recreated with the database");
+        console.log("The collection of Activity has been recreated with the database");
 
     } catch (err) {
         console.log(err)
@@ -103,38 +89,64 @@ const addCommune = async () => {
         await Commune.insertMany([
 
                 {
-                    commune: "Test Commune",
+                    name: "Test Commune",
                     region: "paris",
                     codepostal:"10000"
-                },
-                // {
-                //     commune: "lilas",
-                //     region: "paris",
-                //     codepostal:"75002"
-                // },
-                // {
-                //     commune: "gambetta",
-                //     region: "paris",
-                //     codepostal:"75003"
-                // },
-                // {
-                //     commune: "chapelle",
-                //     region: "paris",
-                //     codepostal:"75004"
-                // },
-                // {
-                //     commune: "drancy",
-                //     region: "saint denis",
-                //     codepostal:"93001"
-                // },
-                // {
-                //     commune: "chatelet",
-                //     region: "paris",
-                //     codepostal:"75005"
-                // }
+                }
         ])
 
-        console.log("The collection of Commune are recreated with the database");
+        console.log("The collection of Commune has been recreated with the database");
+
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+// create payment collection
+
+const addPayment = async () => {
+
+    try {
+        
+        await Payment.deleteMany({}).lean()
+
+        await Payment.insertMany([
+
+                {
+                    telephone: "148381111",
+                    communeID: "1C001",
+                    date: "2021/06/06",
+                    amount:"10"
+                }
+        ])
+
+        console.log("The collection of Payment has been recreated with the database");
+
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+// create communeInfo collection
+
+const addCommuneInfo = async () => {
+
+    try {
+        
+        await CommuneInfo.deleteMany({}).lean()
+
+        await CommuneInfo.insertMany([
+
+                {
+                    communeID: "1C001",
+                    date: "2021/06/06",
+                    travaux: "decoration",
+                    place:"rue paster",
+                    amount_spent:"5000"
+                }
+        ])
+
+        console.log("The collection of CommuneInfo has been recreated with the database");
 
     } catch (err) {
         console.log(err)
@@ -144,3 +156,5 @@ const addCommune = async () => {
 addUser();
 addActivity();
 addCommune();
+addPayment();
+addCommuneInfo();

@@ -9,6 +9,8 @@ const jwt = require('jsonwebtoken');    // to create jsonwebtoken
 const userModel = require('../Model/userModel');
 const activityModel = require('../Model/activityModel')
 const communeModel = require('../Model/communeModel');
+const communeInfoModel = require('../Model/communeInfoModel');
+const paymentModel = require('../Model/paymentModel');
 
 const { debug } = require('../Middleware/debug');
 
@@ -18,7 +20,7 @@ const getUserList = (debug, async (req, res) => {
 
     try {
 
-        const userlist = await userModel.find({})   
+        const userlist = await userModel.find({})
 
         res.json({
             message: "List of users currently available in database",
@@ -78,7 +80,7 @@ const signupNewUser = (async (req, res, next) => {
 
             if (!activityExist) {
 
-                const addActivity = await activityModel.create({ activity: userActivity })
+                const addActivity = await activityModel.create({ name: userActivity })
 
                 console.log(`New activity "${userActivity}" is added to database`)
 
@@ -92,7 +94,7 @@ const signupNewUser = (async (req, res, next) => {
 
             if (!communeExist) {
 
-                const addCommune = await communeModel.create({ commune: userCommune, codepostal: userActivitycodepostal })
+                const addCommune = await communeModel.create({ name: userCommune, codepostal: userActivitycodepostal })
 
                 console.log(`New Commune "${addCommune}" is added to database`)
 
@@ -104,9 +106,9 @@ const signupNewUser = (async (req, res, next) => {
 
             if (errorVal.isEmpty()) {
 
-                const activityID = await activityModel.findOne({ activity: req.body.activity }).lean()
+                const activityID = await activityModel.findOne({ name: req.body.activity }).lean()
 
-                const communeID = await communeModel.findOne({ commune: req.body.commune }).lean()
+                const communeID = await communeModel.findOne({ name: req.body.commune }).lean()
 
                 console.log("activityID", activityID)
                 console.log("communeID", communeID)
@@ -206,7 +208,7 @@ const login = (
                 }, "secret", {
                     expiresIn: tokenExpire       // token expiry time mentioned in const above
                 })
-    
+
                 res.json({
                     message: `${telephoneExist.surname}, ${userTelephone} is logged in`,
                     telephoneExist,
@@ -231,8 +233,57 @@ const login = (
     }
 )
 
+const payment = (
+
+    async (req, res) => {
+
+        console.log("Im in payment route")
+        // const userPaymentDetail = req.body;
+
+        const userTelephone = req.body.telephone;
+        const userAmount = req.body.amount;
+
+        try {
+
+            const userInfo = await userModel.findOne({ telephone: userTelephone })
+
+                // pick user information from collection
+            if (userInfo) {
+
+                console.log("User, Commune and Activity Commune", userInfo.telephone, userInfo.communeID, userInfo.activityID);
+
+                // add new payment 
+                const addPayment = await paymentModel.create(
+                    {
+                        telephone: userTelephone,
+                        communeID: userInfo.communeID,
+                        activityID: userInfo.activityID,
+                        amount: userAmount
+                    })
+
+                    res.json({
+                        message: "Payment added successfully",
+                        addPayment,
+                        userInfo
+                    })
+
+            } else {
+
+                res.json({
+                    message: "User is not registered or user information not available, payment cancelled",
+                    userInfo
+                })
+            }
+
+        } catch (error) {
+            console.log("Error while making payment", error)
+        }
+    }
+)
+
 module.exports = {
     getUserList,
     signupNewUser,
-    login
+    login,
+    payment
 }
