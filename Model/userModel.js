@@ -7,16 +7,24 @@ const userSchema = new Schema(
         surname: { type: String, require: true },
         firstname: { type: String, require: true },
         dateofbirth: { type: Date },
-        address_personal: { type: String, max: 50 },
-        personal_codepostal: { type: Number, require: true },
-        address_activity: { type: String, max: 50 },
-        activity_codepostal: { type: String,  require: true },
-        activity: { type: String, require: true },
-        activityID: { type: String, require: true },
-        commune: { type: String, require: true },
-        communeID: { type: String, require: true },
+        address_personal: { type: String, max: 200 },
+        personal_communeID: { type: String, require: true },
+        address_activity: { type: String, max: 200 },
+        // activityID: { type: String, require: true },
+        activity_communeID: {
+            type: mongoose.Types.ObjectId,
+            ref: "Commune"
+        },
+        activityID: {
+            type: mongoose.Types.ObjectId,
+            ref: "Activity"
+        },
         telephone: { type: Number, unique: true, require: true },
         password: { type: String, require: true, min: 6, max: 15 },
+        payments: [{
+            type: mongoose.Types.ObjectId,
+            ref: "Payment"
+        }],
         created: { type: Date, default: Date.now }
     }
 );

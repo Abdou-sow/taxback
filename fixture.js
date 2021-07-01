@@ -2,8 +2,9 @@ const mongoose = require('mongoose');
 const userModel = require('./Model/userModel');
 const communeModel = require('./Model/communeModel');
 const activityModel = require('./Model/activityModel')
-const communeInfoModel = require('./Model/communeInfoModel');
+// const communeInfoModel = require('./Model/communeInfoModel');
 const paymentModel = require('./Model/paymentModel');
+// const communePageModel = require('./Model/communePageModel');
 const bcrypt = require('bcryptjs');
 
 // connect to database
@@ -87,43 +88,35 @@ const addCommune = async () => {
 
             {
                 name: "champs-elysées",
-                region: "paris",
-                codepostal: "75008"
+                information: "elysees palace"
             },
             {
                 name: "avenue victor hugo",
-                region: "paris",
-                codepostal: "75116"
+                information: "victor hugo"
             },
             {
                 name: "avenue montaigne",
-                region: "paris",
-                codepostal: "75008"
+                information: "montaigne"
             },
             {
                 name: "rue de rivoli",
-                region: "paris",
-                codepostal: "75004"
+                information: "rivoli"
             },
             {
                 name: "passages couverts",
-                region: "paris",
-                codepostal: "75008"
+                information: "pass couverts"
             },
             {
                 name: "rue de la paix",
-                region: "paris",
-                codepostal: "75002"
+                information: "rue paix"
             },
             {
                 name: "avenue de l’opéra",
-                region: "paris",
-                codepostal: "75001"
+                information: "l’opéra"
             },
             {
                 name: "rue soufflot",
-                region: "paris",
-                codepostal: "75005"
+                information: "soufflot"
             }
         ])
 
@@ -145,12 +138,12 @@ const addUser = async () => {
 
     try {
 
-        const communeDetails = await communeModel.findOne({ name: "champs-elysées" }).lean()     // take commune id to save in with user collection
+        // const communeDetails = await communeModel.findOne({ name: "champs-elysées" }).lean()     // take commune id to save in with user collection
 
-        const activityDetails = await activityModel.findOne({ name: "vendeur" }).lean()  // take activity id to save in with user collection
+        // const activityDetails = await activityModel.findOne({ name: "vendeur" }).lean()  // take activity id to save in with user collection
 
-        console.log("activityDetails", activityDetails)
-        console.log("communeDetails", communeDetails)
+        // console.log("activityDetails", activityDetails)
+        // console.log("communeDetails", communeDetails)
 
         await userModel.deleteMany({}).lean()
 
@@ -161,13 +154,9 @@ const addUser = async () => {
                 firstname: "emmanualle",
                 dateofbirth: "2000/12/12",
                 address_personal: "12 elyse palace",
-                personal_codepostal: "75001",
                 address_activity: "paris",
-                activity_codepostal: "75002",
                 activity: "vendeur",
-                activityID: activityDetails._id,
                 commune: "champs-elysées",
-                communeID: communeDetails._id,
                 telephone: "148381111",
                 password: passwordHash
             }
@@ -185,8 +174,8 @@ const addPayment = async () => {
 
     try {
 
-        const communeDetails = await communeModel.findOne({ name: "champs-elysées" }).lean()     // take commune id to save in with user collection
-        const activityDetails = await activityModel.findOne({ name: "vendeur" }).lean()  // take activity id to save in with user collection
+        // const communeDetails = await communeModel.findOne({ name: "champs-elysées" }).lean()     // take commune id to save in with user collection
+        // const activityDetails = await activityModel.findOne({ name: "vendeur" }).lean()  // take activity id to save in with user collection
 
         // console.log("communeDetails", communeDetails)
 
@@ -197,10 +186,10 @@ const addPayment = async () => {
         await paymentModel.insertMany([
 
             {
-                telephone: "148381111",
-                communeID: communeDetails._id,
-                activityID: activityDetails._id,
-                date: "2021/06/06",
+                // telephone: "148381111",
+                // communeID: communeDetails._id,
+                // activityID: activityDetails._id,
+                // date: "2021/06/06",
                 amount: "10"
             }
         ])
@@ -241,10 +230,34 @@ const addCommuneInfo = async () => {
     }
 }
 
+// const addCommunePageInfo = async () => {
+
+//     try {
+
+//         const communeDetails = await communeModel.findOne({ name: "champs-elysées" }).lean()     // take commune id to save in with user collection
+//         // console.log("communeDetails", communeDetails)
+
+//         await communePageModel.deleteMany({}).lean()
+
+//         await communePageModel.insertMany([
+
+//             {
+//                 communeID: communeDetails._id,
+//                 information: "type something here...."
+//             }
+//         ])
+
+//         console.log("The collection of CommuneInfo has been recreated with the database");
+
+//     } catch (err) {
+//         console.log(err)
+//     }
+// }
+
 addActivity();
 addCommune();
 setTimeout(function () { addUser() }, 3000);        // will wait to get updated activity/commune collection to avoid promise error
 setTimeout(function () { addPayment() }, 3000);     // will wait to get updated adduser collection to avoid promise error
-setTimeout(function () { addCommuneInfo() }, 3000); // will wait to get updated addcommune collection to avoid promise error
+// setTimeout(function () { addCommuneInfo() }, 3000); // will wait to get updated addcommune collection to avoid promise error
 
 

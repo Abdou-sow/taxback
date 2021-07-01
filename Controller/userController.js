@@ -9,8 +9,9 @@ const jwt = require('jsonwebtoken');    // to create jsonwebtoken
 const userModel = require('../Model/userModel');
 const activityModel = require('../Model/activityModel')
 const communeModel = require('../Model/communeModel');
-const communeInfoModel = require('../Model/communeInfoModel');
+// const communeInfoModel = require('../Model/communeInfoModel');
 const paymentModel = require('../Model/paymentModel');
+// const communePageModelModel = require('../Model/communePageModel')
 
 const getUserList = (async (req, res) => {
 
@@ -42,7 +43,14 @@ const getTelephoneNum = (async (req, res) => {
 
     try {
 
-        const telephoneExist = await userModel.findOne({ telephone: req.params.telephone }).lean()     // find user given telephone number record from user list
+        // const telephoneExist = await userModel.findOne({ telephone: req.params.telephone }).lean()     // find user given telephone number record from user list
+        const telephoneExist = await userModel.find().populate("Activity", { name:1, _id:0}).select({
+            surname: 1,
+            firstname:1,
+            dateofbirth: 1,
+            address_activity: 1,
+            telephone: 1
+        })
         console.log("userfound", telephoneExist)
 
         if(telephoneExist) {
@@ -154,7 +162,7 @@ const signupNewUser = (async (req, res, next) => {
 
         } else {
 
-            const activityExist = await activityModel.findOne({ activity: req.body.activity }).lean()   // check the user entered new activity
+            const activityExist = await activityModel.findOne({ name: req.body.activity }).lean()   // check the user entered new activity
 
             if (!activityExist) {
 
@@ -168,7 +176,7 @@ const signupNewUser = (async (req, res, next) => {
                 // })
             }
 
-            const communeExist = await communeModel.findOne({ commune: req.body.commune }).lean()   // check the user entered new commune
+            const communeExist = await communeModel.findOne({ name: req.body.commune }).lean()   // check the user entered new commune
 
             if (!communeExist) {
 
@@ -384,6 +392,37 @@ const getCommuneInfo = (async (req, res) => {
     }
 })
 
+// const getCommuneAccueilInfo = (async (req, res) => {
+
+//     console.log("Im in getCommuneInfo", req.params.name)
+
+//     try {
+
+//         const communeID = await communeModel.findOne({ name: req.params.name })   // get information for given commune from commune collection    // 
+
+//         console.log("communeInfo", communeID.name)
+//         console.log("communeInfo", communeID._id)
+
+//         const communeInfo = await communePageModel.find({ communeID: communeID._id })   // based on the commune _id fetch all commune infromation from communeInfo collection
+
+//         console.log(communeInfo)
+
+//         res.json({
+//             message: "List of community information available for**** ",
+//             communeInfo
+
+//         })
+
+//     } catch (error) {
+//         console.log("Error while getting data for activity", error)
+
+//         res.json({
+//             message: "Error while getting data for activity",
+//             error
+//         })
+//     }
+// })
+
 module.exports = {
     getUserList,
     getTelephoneNum,
@@ -392,5 +431,6 @@ module.exports = {
     payment,
     getActivityList,
     getCommuneList,
-    getCommuneInfo
+    getCommuneInfo,
+    // getCommuneAccueilInfo
 }
