@@ -18,7 +18,7 @@ const getUserList = (async (req, res) => {
 
     try {
 
-        const userlist = await userModel.find({})
+        const userlist = await userModel.find({})       // find all records in user collection
 
         res.json({
             message: "List of users currently available in database",
@@ -38,11 +38,11 @@ const getUserList = (async (req, res) => {
 
 const getTelephoneNum = (async (req, res) => {
 
-    console.log("Im in getTelephoneNum", req.params.id)
+    console.log("Im in getTelephoneNum", req.params.telephone)
 
     try {
 
-        const telephoneExist = await userModel.findOne({ telephone: req.params.id }).lean()
+        const telephoneExist = await userModel.findOne({ telephone: req.params.telephone }).lean()     // find user given telephone number record from user list
         console.log("userfound", telephoneExist)
 
         if(telephoneExist) {
@@ -75,7 +75,7 @@ const getActivityList = (async (req, res) => {
     console.log("Im in getActivityList", req.body)
 
     try {
-        const activityList = await activityModel.find({})
+        const list = await activityModel.find({})       // find all records in activity collection
 
         res.json({
             message: "List of activity currently available in database",
@@ -98,7 +98,7 @@ const getCommuneList = (async (req, res) => {
     console.log("Im in getCommuneList", req.body)
 
     try {
-        const communeList = await communeModel.find({})
+        const list = await communeModel.find({})        // find all records in commune collection
 
         res.json({
             message: "List of Commune currently available in database",
@@ -142,7 +142,7 @@ const signupNewUser = (async (req, res, next) => {
 
     try {
 
-        const telephoneExist = await userModel.findOne({ telephone: req.body.telephone }).lean()
+        const telephoneExist = await userModel.findOne({ telephone: req.body.telephone }).lean()    // check whether the user is already registered 
         // console.log("userfound", telephoneExist)
 
         if (telephoneExist) {
@@ -154,11 +154,11 @@ const signupNewUser = (async (req, res, next) => {
 
         } else {
 
-            const activityExist = await activityModel.findOne({ activity: req.body.activity }).lean()
+            const activityExist = await activityModel.findOne({ activity: req.body.activity }).lean()   // check the user entered new activity
 
             if (!activityExist) {
 
-                const addActivity = await activityModel.create({ name: userActivity })
+                const addActivity = await activityModel.create({ name: userActivity })  // if user enters new activity save it in activity collection
 
                 console.log(`New activity "${userActivity}" is added to database`)
 
@@ -168,11 +168,11 @@ const signupNewUser = (async (req, res, next) => {
                 // })
             }
 
-            const communeExist = await communeModel.findOne({ commune: req.body.commune }).lean()
+            const communeExist = await communeModel.findOne({ commune: req.body.commune }).lean()   // check the user entered new commune
 
             if (!communeExist) {
 
-                const addCommune = await communeModel.create({ name: userCommune, codepostal: userActivitycodepostal })
+                const addCommune = await communeModel.create({ name: userCommune, codepostal: userActivitycodepostal })  // if user enters new commune save it in commune collection
 
                 console.log(`New Commune "${addCommune}" is added to database`)
 
@@ -184,9 +184,9 @@ const signupNewUser = (async (req, res, next) => {
 
             if (errorVal.isEmpty()) {
 
-                const activityID = await activityModel.findOne({ name: req.body.activity }).lean()
+                const activityID = await activityModel.findOne({ name: req.body.activity }).lean()  // take activity id to save with user collection
 
-                const communeID = await communeModel.findOne({ name: req.body.commune }).lean()
+                const communeID = await communeModel.findOne({ name: req.body.commune }).lean()     // take commune id to save with user collection
 
                 console.log("activityID", activityID)
                 console.log("communeID", communeID)
@@ -254,7 +254,7 @@ const login = (async (req, res) => {
 
     console.log("Im in login route")
 
-    const tokenExpire = "300s"      // token expires in 300s(5 minutes)
+    const tokenExpire = "300s"      // setting for token expires in 300s(5 minutes)
 
     // console.log("req.body", req.body)
 
@@ -269,9 +269,9 @@ const login = (async (req, res) => {
 
         // console.log("passwordHash", passwordHash)
 
-        const telephoneExist = await userModel.findOne({ telephone: userTelephone })
+        const telephoneExist = await userModel.findOne({ telephone: userTelephone })    // check is the user registered in collection
 
-        const validPassword = bcrypt.compareSync(userPassword, telephoneExist.password)
+        const validPassword = bcrypt.compareSync(userPassword, telephoneExist.password)     // if yes, compare the user password  with saved password 
 
         // console.log("telephoneExist.password", telephoneExist.password)
 
@@ -285,7 +285,7 @@ const login = (async (req, res) => {
                 expiresIn: tokenExpire       // token expiry time mentioned in const above
             })
 
-            res.json({
+            res.json({                                                                  // pass on login details to frontend for further process
                 message: `${telephoneExist.surname}, ${userTelephone} is logged in`,
                 telephoneExist,
                 validToken,
@@ -318,9 +318,8 @@ const payment = (async (req, res) => {
 
     try {
 
-        const userInfo = await userModel.findOne({ telephone: userTelephone })
+        const userInfo = await userModel.findOne({ telephone: userTelephone })      // pick user information from collection
 
-        // pick user information from collection
         if (userInfo) {
 
             console.log("User, Commune and Activity Commune", userInfo.telephone, userInfo.communeID, userInfo.activityID);
@@ -353,18 +352,21 @@ const payment = (async (req, res) => {
     }
 })
 
-// NOT WORKING COMPLETE THE CODE
+
 const getCommuneInfo = (async (req, res) => {
 
-    console.log("Im in getCommuneInfo", req.query.params)
-    const userCommune = req.body;
+    console.log("Im in getCommuneInfo", req.params.name)
 
     try {
 
-        const communeInfo = await communeModel.findOne({ name: userCommune })
+        const communeID = await communeModel.findOne({ name: req.params.name })   // get information for given commune from commune collection    // 
 
-        console.log("communeInfo", communeInfo)
-        console.log("communeInfo", communeInfo._id)
+        console.log("communeInfo", communeID.name)
+        console.log("communeInfo", communeID._id)
+
+        const communeInfo = await communeInfoModel.find({ communeID: communeID._id })   // based on the commune _id fetch all commune infromation from communeInfo collection
+
+        console.log(communeInfo)
 
         res.json({
             message: "List of community information available for**** ",
