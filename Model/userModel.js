@@ -8,8 +8,8 @@ const userSchema = new Schema(
         firstname: { type: String, require: true },
         dateofbirth: { type: Date },
         address_personal: { type: String, max: 200 },
-        personal_communeID: { type: String, require: true },
         address_activity: { type: String, max: 200 },
+        // personal_communeID: { type: String, require: true },
         // activityID: { type: String, require: true },
         activity_communeID: {
             type: mongoose.Types.ObjectId,
@@ -21,10 +21,6 @@ const userSchema = new Schema(
         },
         telephone: { type: Number, unique: true, require: true },
         password: { type: String, require: true, min: 6, max: 15 },
-        payments: [{
-            type: mongoose.Types.ObjectId,
-            ref: "Payment"
-        }],
         created: { type: Date, default: Date.now }
     }
 );

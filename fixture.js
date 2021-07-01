@@ -88,7 +88,8 @@ const addCommune = async () => {
 
             {
                 name: "champs-elysées",
-                information: "elysees palace"
+                information: "Les Champs-Élysées sont une avenue vraiment charmante : une scène de carte postale. Longue de près de 2 kilomètres, cette artère historique s'étend de la place de la Concorde au majestueux Arc de Triomphe. Bien qu'elle soit devenue depuis \"la plus belle avenue du monde\", les Champs-Élysées étaient autrefois un marécage. C'est au XVIIe siècle qu'André Le Nôtre, jardinier du Roi Soleil, en a tracé le chemin originel. Une légende est née. L'avenue n'a fait que s'embellir au fil des décennies."
+            
             },
             {
                 name: "avenue victor hugo",
@@ -138,12 +139,12 @@ const addUser = async () => {
 
     try {
 
-        // const communeDetails = await communeModel.findOne({ name: "champs-elysées" }).lean()     // take commune id to save in with user collection
+        const communeDetails = await communeModel.findOne({ name: "champs-elysées" }).lean()     // take commune id to save in with user collection
 
-        // const activityDetails = await activityModel.findOne({ name: "vendeur" }).lean()  // take activity id to save in with user collection
+        const activityDetails = await activityModel.findOne({ name: "vendeur" }).lean()  // take activity id to save in with user collection
 
-        // console.log("activityDetails", activityDetails)
-        // console.log("communeDetails", communeDetails)
+        console.log("activityDetails", activityDetails)
+        console.log("communeDetails", communeDetails)
 
         await userModel.deleteMany({}).lean()
 
@@ -155,8 +156,8 @@ const addUser = async () => {
                 dateofbirth: "2000/12/12",
                 address_personal: "12 elyse palace",
                 address_activity: "paris",
-                activity: "vendeur",
-                commune: "champs-elysées",
+                activity_communeID: communeDetails._id,
+                activityID: activityDetails._id,
                 telephone: "148381111",
                 password: passwordHash
             }
@@ -174,23 +175,22 @@ const addPayment = async () => {
 
     try {
 
-        // const communeDetails = await communeModel.findOne({ name: "champs-elysées" }).lean()     // take commune id to save in with user collection
-        // const activityDetails = await activityModel.findOne({ name: "vendeur" }).lean()  // take activity id to save in with user collection
+        const defaultUser = "148381111";    // user signed in telephone number
 
-        // console.log("communeDetails", communeDetails)
+        const userDetails = await userModel.findOne({ telephone: defaultUser }).lean()     // take commune id to save in with user collection
+        
+        console.log("userDetails", userDetails)
 
-        // console.log("activityDetails", activityDetails)
+        console.log("User _id is ", userDetails._id)
 
         await paymentModel.deleteMany({}).lean()
 
         await paymentModel.insertMany([
 
             {
-                // telephone: "148381111",
-                // communeID: communeDetails._id,
-                // activityID: activityDetails._id,
-                // date: "2021/06/06",
-                amount: "10"
+                userId: userDetails._id,
+                amount: "10",
+                date: { type: Date, default: Date.now }
             }
         ])
 
@@ -203,47 +203,23 @@ const addPayment = async () => {
 
 // create communeInfo collection
 
-const addCommuneInfo = async () => {
-
-    try {
-
-        const communeDetails = await communeModel.findOne({ name: "champs-elysées" }).lean()     // take commune id to save in with user collection
-        // console.log("communeDetails", communeDetails)
-
-        await communeInfoModel.deleteMany({}).lean()
-
-        await communeInfoModel.insertMany([
-
-            {
-                communeID: communeDetails._id,
-                date: "2021/06/06",
-                travaux: "decoration",
-                place: "rue paster",
-                amount_spent: "5000"
-            }
-        ])
-
-        console.log("The collection of CommuneInfo has been recreated with the database");
-
-    } catch (err) {
-        console.log(err)
-    }
-}
-
-// const addCommunePageInfo = async () => {
+// const addCommuneInfo = async () => {
 
 //     try {
 
 //         const communeDetails = await communeModel.findOne({ name: "champs-elysées" }).lean()     // take commune id to save in with user collection
 //         // console.log("communeDetails", communeDetails)
 
-//         await communePageModel.deleteMany({}).lean()
+//         await communeInfoModel.deleteMany({}).lean()
 
-//         await communePageModel.insertMany([
+//         await communeInfoModel.insertMany([
 
 //             {
 //                 communeID: communeDetails._id,
-//                 information: "type something here...."
+//                 date: "2021/06/06",
+//                 travaux: "decoration",
+//                 place: "rue paster",
+//                 amount_spent: "5000"
 //             }
 //         ])
 
@@ -254,10 +230,8 @@ const addCommuneInfo = async () => {
 //     }
 // }
 
+
 addActivity();
 addCommune();
 setTimeout(function () { addUser() }, 3000);        // will wait to get updated activity/commune collection to avoid promise error
-setTimeout(function () { addPayment() }, 3000);     // will wait to get updated adduser collection to avoid promise error
-// setTimeout(function () { addCommuneInfo() }, 3000); // will wait to get updated addcommune collection to avoid promise error
-
-
+setTimeout(function () { addPayment() }, 10000 );     // will wait to get updated adduser collection to avoid promise error

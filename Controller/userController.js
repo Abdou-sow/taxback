@@ -43,14 +43,14 @@ const getTelephoneNum = (async (req, res) => {
 
     try {
 
-        // const telephoneExist = await userModel.findOne({ telephone: req.params.telephone }).lean()     // find user given telephone number record from user list
-        const telephoneExist = await userModel.find().populate("Activity", { name:1, _id:0}).select({
-            surname: 1,
-            firstname:1,
-            dateofbirth: 1,
-            address_activity: 1,
-            telephone: 1
-        })
+        const telephoneExist = await userModel.findOne({ telephone: req.params.telephone }).lean()     // find user given telephone number record from user list
+        // const telephoneExist = await userModel.find().populate("Activity", { name:1, _id:0}).select({
+        //     surname: 1,
+        //     firstname:1,
+        //     dateofbirth: 1,
+        //     address_activity: 1,
+        //     telephone: 1
+        // })
         console.log("userfound", telephoneExist)
 
         if(telephoneExist) {
@@ -134,15 +134,13 @@ const signupNewUser = (async (req, res, next) => {
     const userFirstname = req.body.firstname
     const userDateofbirth = req.body.dateofbirth
     const userAddress_personal = req.body.address_personal
-    const userPersonalcodepostal = req.body.personal_codepostal
     const userAddress_Activity = req.body.address_activity
-    const userActivitycodepostal = req.body.activity_codepostal
+    const userActivityCommune = req.body.activity_commune
     const userActivity = req.body.activity
-    const userCommune = req.body.commune
     const userTelephone = req.body.telephone
     const userPassword = req.body.password
-
-    console.log(req.body)
+    
+     console.log(req.body)
 
     // const hasErrors = !errorVal.isEmpty();
 
@@ -162,7 +160,7 @@ const signupNewUser = (async (req, res, next) => {
 
         } else {
 
-            const activityExist = await activityModel.findOne({ name: req.body.activity }).lean()   // check the user entered new activity
+            const activityExist = await activityModel.findOne({ name: userActivity }).lean()   // check the user entered new activity
 
             if (!activityExist) {
 
@@ -176,11 +174,11 @@ const signupNewUser = (async (req, res, next) => {
                 // })
             }
 
-            const communeExist = await communeModel.findOne({ name: req.body.commune }).lean()   // check the user entered new commune
+            const communeExist = await communeModel.findOne({ name: userActivityCommune }).lean()   // check the user entered new commune
 
             if (!communeExist) {
 
-                const addCommune = await communeModel.create({ name: userCommune, codepostal: userActivitycodepostal })  // if user enters new commune save it in commune collection
+                const addCommune = await communeModel.create({ name: userActivityCommune, information: userActivityCommune })  // if user enters new commune save it in commune collection
 
                 console.log(`New Commune "${addCommune}" is added to database`)
 
@@ -192,9 +190,9 @@ const signupNewUser = (async (req, res, next) => {
 
             if (errorVal.isEmpty()) {
 
-                const activityID = await activityModel.findOne({ name: req.body.activity }).lean()  // take activity id to save with user collection
+                const activityID = await activityModel.findOne({ name: userActivity }).lean()  // take activity id to save with user collection
 
-                const communeID = await communeModel.findOne({ name: req.body.commune }).lean()     // take commune id to save with user collection
+                const communeID = await communeModel.findOne({ name: userActivityCommune }).lean()     // take commune id to save with user collection
 
                 console.log("activityID", activityID)
                 console.log("communeID", communeID)
@@ -207,13 +205,9 @@ const signupNewUser = (async (req, res, next) => {
                         firstname: userFirstname,
                         dateofbirth: userDateofbirth,
                         address_personal: userAddress_personal,
-                        personal_codepostal: userPersonalcodepostal,
                         address_activity: userAddress_Activity,
-                        activity_codepostal: userActivitycodepostal,
-                        activity: userActivity,
                         activityID: activityID._id,
-                        commune: userCommune,
-                        communeID: communeID._id,
+                        activity_communeID: communeID._id,
                         telephone: userTelephone,
                         password: password
                     })
@@ -335,9 +329,7 @@ const payment = (async (req, res) => {
             // add new payment 
             const addPayment = await paymentModel.create(
                 {
-                    telephone: userTelephone,
-                    communeID: userInfo.communeID,
-                    activityID: userInfo.activityID,
+                    userId: userInfo._id,
                     amount: userAmount
                 })
 
@@ -367,17 +359,12 @@ const getCommuneInfo = (async (req, res) => {
 
     try {
 
-        const communeID = await communeModel.findOne({ name: req.params.name })   // get information for given commune from commune collection    // 
-
-        console.log("communeInfo", communeID.name)
-        console.log("communeInfo", communeID._id)
-
-        const communeInfo = await communeInfoModel.find({ communeID: communeID._id })   // based on the commune _id fetch all commune infromation from communeInfo collection
+        const communeInfo = await communeModel.findOne({ name: req.params.name })   // get information for given commune from commune collection    // 
 
         console.log(communeInfo)
 
         res.json({
-            message: "List of community information available for**** ",
+            message: "Detail of commune ",
             communeInfo
 
         })
