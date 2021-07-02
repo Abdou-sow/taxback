@@ -9,8 +9,6 @@ const userSchema = new Schema(
         dateofbirth: { type: Date },
         address_personal: { type: String, max: 200 },
         address_activity: { type: String, max: 200 },
-        // personal_communeID: { type: String, require: true },
-        // activityID: { type: String, require: true },
         activity_communeID: {
             type: mongoose.Types.ObjectId,
             ref: "Commune"
@@ -22,6 +20,8 @@ const userSchema = new Schema(
         telephone: { type: Number, unique: true, require: true },
         password: { type: String, require: true, min: 6, max: 15 },
         created: { type: Date, default: Date.now }
+        // personal_communeID: { type: String, require: true },
+        // activityID: { type: String, require: true },
     }
 );
 

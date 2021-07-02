@@ -232,6 +232,10 @@ const addPayment = async () => {
 
 
 addActivity();
+console.log("Please wait .....")
 addCommune();
+console.log("Please wait .....")
 setTimeout(function () { addUser() }, 3000);        // will wait to get updated activity/commune collection to avoid promise error
+console.log("Please wait .....")
 setTimeout(function () { addPayment() }, 10000 );     // will wait to get updated adduser collection to avoid promise error
+console.log("Please wait .....")

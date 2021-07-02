@@ -8,8 +8,11 @@ const router = require('./Routes/taxRoutes');
 app.use(cors());
 app.use(express.json());
 
+// const port = config.port;
 const port = 9001;
 
+
+// mongoose.connect(config.mongoURL, { useNewUrlParser: true }, { useUnifiedTopology: true }, (err) => {
 mongoose.connect("mongodb://localhost:27017/tax-commune", { useNewUrlParser: true }, { useUnifiedTopology: true }, (err) => {
     if (err) {
         console.error(err)

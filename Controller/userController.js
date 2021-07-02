@@ -9,9 +9,7 @@ const jwt = require('jsonwebtoken');    // to create jsonwebtoken
 const userModel = require('../Model/userModel');
 const activityModel = require('../Model/activityModel')
 const communeModel = require('../Model/communeModel');
-// const communeInfoModel = require('../Model/communeInfoModel');
 const paymentModel = require('../Model/paymentModel');
-// const communePageModelModel = require('../Model/communePageModel')
 
 const getUserList = (async (req, res) => {
 
@@ -283,7 +281,7 @@ const login = (async (req, res) => {
 
             const validToken = await jwt.sign({     // creates token using jwt with "secret" code and time to expires the token
                 id: telephoneExist.id
-            }, "secret", {
+            }, "secret", {      // config.secret,   // when you connect with congig.js file use this
                 expiresIn: tokenExpire       // token expiry time mentioned in const above
             })
 
@@ -352,6 +350,54 @@ const payment = (async (req, res) => {
     }
 })
 
+const getPaymentByUser = (async (req, res) => {
+
+    console.log("Im in getPaymentByUser", req.params.telephone)
+
+    try {
+
+        const telephoneExist = await userModel.findOne({ telephone: req.params.telephone }).lean()     // find user given telephone number record from user list
+        // const telephoneExist = await userModel.find().populate("Activity", { name:1, _id:0}).select({
+            //     surname: 1,
+            //     firstname:1,
+            //     dateofbirth: 1,
+            //     address_activity: 1,
+            //     telephone: 1
+            // })
+            console.log("userfound", telephoneExist)
+            
+            if(telephoneExist) {
+                
+                const userID = telephoneExist._id;
+                console.log("userID and his telephone number is", userID, telephoneExist.telephone);
+                
+                const userPaymentList = await paymentModel.find({ userId: userID }).lean()     // find all payment made by user based on his userID
+                console.log(userPaymentList)
+
+            res.json({
+                message: "User Found",
+                telephoneExist,
+                userPaymentList
+            })
+        } else {
+
+            res.json({
+                message: "User not found",
+                telephoneExist
+
+            })
+        }
+        
+    } catch (error) {
+        console.log("Error while verifing the user telephone number")
+
+        res.json({
+            message: "Error while verifing the user telephone number",
+            error
+        })
+    }
+})
+
 
 const getCommuneInfo = (async (req, res) => {
 
@@ -379,36 +425,33 @@ const getCommuneInfo = (async (req, res) => {
     }
 })
 
-// const getCommuneAccueilInfo = (async (req, res) => {
+const getCommuneAccueilInfo = (async (req, res) => {
 
-//     console.log("Im in getCommuneInfo", req.params.name)
+    console.log("Im in getCommuneInfo", req.params.name)
 
-//     try {
+    try {
 
-//         const communeID = await communeModel.findOne({ name: req.params.name })   // get information for given commune from commune collection    // 
+        const communeID = await communeModel.findOne({ name: req.params.name })   // get information for given commune from commune collection    // 
 
-//         console.log("communeInfo", communeID.name)
-//         console.log("communeInfo", communeID._id)
+        console.log("communeInfo", communeID.name)
+        console.log("communeInfo", communeID._id)
+        console.log("communeInfo", communeID.information)
 
-//         const communeInfo = await communePageModel.find({ communeID: communeID._id })   // based on the commune _id fetch all commune infromation from communeInfo collection
+        res.json({
+            message: "List of community information available for**** ",
+            communeID
 
-//         console.log(communeInfo)
+        })
 
-//         res.json({
-//             message: "List of community information available for**** ",
-//             communeInfo
+    } catch (error) {
+        console.log("Error while getting data for activity", error)
 
-//         })
-
-//     } catch (error) {
-//         console.log("Error while getting data for activity", error)
-
-//         res.json({
-//             message: "Error while getting data for activity",
-//             error
-//         })
-//     }
-// })
+        res.json({
+            message: "Error while getting data for activity",
+            error
+        })
+    }
+})
 
 module.exports = {
     getUserList,
@@ -419,5 +462,6 @@ module.exports = {
     getActivityList,
     getCommuneList,
     getCommuneInfo,
-    // getCommuneAccueilInfo
+    getPaymentByUser,
+    getCommuneAccueilInfo
 }
