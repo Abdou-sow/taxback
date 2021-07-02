@@ -6,6 +6,8 @@ const { signupUserValidator } = require('../Middleware/signupUserValidator')
 const { loginUserValidator } = require('../Middleware/loginUserValidator')
 const { paymentValidator } = require('../Middleware/paymentValidation');
 
+const verifyToken = require('../Middleware/verifyToken');
+
 const
     {   getUserList,
         getTelephoneNum,
@@ -19,7 +21,7 @@ const
         getCommuneAccueilInfo
     } = require('../Controller/userController')
 
-router.get("/users", debug, getUserList);                       // http://localhost:9001/users     --for all users in the database
+router.get("/users", debug, getUserList);          // http://localhost:9001/users     --for all users in the database
 
 router.get("/telephone/:telephone", debug, getTelephoneNum)     // http://localhost:9001/telephone/148381111    --search by given telephone number
 

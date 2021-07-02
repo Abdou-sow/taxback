@@ -1,19 +1,18 @@
+
 const verifyToken = async (req, res, next) => {
     try {
         const token = req.headers.authorization.split(" ")[1]
 
         const result = jwt.verify(token, config.secret)
 
-        
+        if (result.id) {
+            const user = await userModel.findById(result.id).lean()
 
-        // if (result.id) {
-        //     const user = await userModel.findById({ _id: result.id })
-
-        //     next()
-        // }
+            req.user = user
+            next()
+        }
     } catch (error) {
-        res.status(500).json({ message: error })
+        console.log("Error: ", error)
+        res.status(401).json({ message: "You don't have acces to this information" })
     }
 }
-
-exports.module = verifyToken;

@@ -11,7 +11,8 @@ const activityModel = require('../Model/activityModel')
 const communeModel = require('../Model/communeModel');
 const paymentModel = require('../Model/paymentModel');
 
-const getUserList = (async (req, res) => {
+
+const getUserList = ( async (req, res) => {
 
     console.log("En getUserList controller", req.body)
 
@@ -59,7 +60,7 @@ const getTelephoneNum = (async (req, res) => {
             })
         } else {
 
-            res.json({
+            res.status(400).json({
                 message: "User not found",
                 telephoneExist
 
@@ -219,7 +220,7 @@ const signupNewUser = (async (req, res, next) => {
 
                 console.log("Please verify your details matches the regulation");
 
-                res.json({
+                res.status(400).json({
                     message: `Error while processing your ${userTelephone} as new user`,
                     userTelephone,
                     errorVal
@@ -280,7 +281,7 @@ const login = (async (req, res) => {
         if (validPassword) {
 
             const validToken = await jwt.sign({     // creates token using jwt with "secret" code and time to expires the token
-                id: telephoneExist.id
+                id: telephoneExist._id
             }, "secret", {      // config.secret,   // when you connect with congig.js file use this
                 expiresIn: tokenExpire       // token expiry time mentioned in const above
             })
@@ -293,10 +294,9 @@ const login = (async (req, res) => {
             })
 
         } else {
-            res.json({
 
+            res.status(400).json({
                 message: `User ${userTelephone} login problem`
-
             })
         }
     } catch (error) {
@@ -339,7 +339,7 @@ const payment = (async (req, res) => {
 
         } else {
 
-            res.json({
+            res.status(400).json({
                 message: "User is not registered or user information not available, payment cancelled",
                 userInfo
             })
@@ -350,7 +350,7 @@ const payment = (async (req, res) => {
     }
 })
 
-const getPaymentByUser = (async (req, res) => {
+const getPaymentByUser = ( async (req, res) => {
 
     console.log("Im in getPaymentByUser", req.params.telephone)
 
@@ -381,7 +381,7 @@ const getPaymentByUser = (async (req, res) => {
             })
         } else {
 
-            res.json({
+            res.status(400).json({
                 message: "User not found",
                 telephoneExist
 
@@ -418,7 +418,7 @@ const getCommuneInfo = (async (req, res) => {
     } catch (error) {
         console.log("Error while getting data for activity", error)
 
-        res.json({
+        res.status(400).json({
             message: "Error while getting data for activity",
             error
         })
