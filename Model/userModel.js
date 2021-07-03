@@ -9,6 +9,8 @@ const userSchema = new Schema(
         dateofbirth: { type: Date },
         address_personal: { type: String, max: 200 },
         address_activity: { type: String, max: 200 },
+        telephone: { type: Number, unique: true, require: true },
+        password: { type: String, require: true, min: 6, max: 15 },
         activity_communeID: {
             type: mongoose.Types.ObjectId,
             ref: "Commune"
@@ -17,14 +19,10 @@ const userSchema = new Schema(
             type: mongoose.Types.ObjectId,
             ref: "Activity"
         },
-        telephone: { type: Number, unique: true, require: true },
-        password: { type: String, require: true, min: 6, max: 15 },
         created: { type: Date, default: Date.now }
-        // personal_communeID: { type: String, require: true },
-        // activityID: { type: String, require: true },
     }
 );
 
 const userModel = mongoose.model("User", userSchema);
 
-module.exports = userModel;   // user export
+module.exports = userModel;   // userModel export
