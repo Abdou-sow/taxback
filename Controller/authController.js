@@ -9,6 +9,7 @@ const jwt = require('jsonwebtoken');    // to create jsonwebtoken
 const userModel = require('../Model/userModel');
 const activityModel = require('../Model/activityModel')
 const communeModel = require('../Model/communeModel');
+const paymentModel = require('../Model/paymentModel');
 
 const signupNewUser = (async (req, res, next) => {
 
@@ -25,8 +26,8 @@ const signupNewUser = (async (req, res, next) => {
     const userActivity = req.body.activity
     const userTelephone = req.body.telephone
     const userPassword = req.body.password
-    
-     console.log(req.body)
+
+    console.log(req.body)
 
     // const hasErrors = !errorVal.isEmpty();
 
@@ -98,10 +99,20 @@ const signupNewUser = (async (req, res, next) => {
                         password: password
                     })
 
-                res.json({
-                    message: "User successfully added",
-                    userAdded
-                })
+                    const userAccountAdded = await paymentModel.insertMany([
+                        {
+                            userId: userAdded._id,
+                            // amount: "0",
+                            // datepaid: new Date()
+                            payment: { amount: "10", paidon: new Date() }
+                        }
+                    ])
+                    
+                    res.json({
+                        message: "User successfully added",
+                        userAdded,
+                        userAccountAdded
+                    })
 
             } else {
 
@@ -121,18 +132,6 @@ const signupNewUser = (async (req, res, next) => {
         res.json({
             message: `Error while processing your ${userTelephone} as new user`,
             userTelephone
-        })
-    }
-
-    try {
-
-    } catch (error) {
-
-        console.log(`Error while adding new user :- ${userTelephone}`, error);
-
-        res.json({
-            message: `Error while processing your ${userTelephone} as new user`,
-            error
         })
     }
 })

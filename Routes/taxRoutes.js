@@ -27,7 +27,8 @@ const
         getTelephoneNum,
         payment,
         getCommuneInfo,
-        getPaymentByUser
+        getPaymentByUser,
+        getAllUsersPayment
     } = require('../Controller/privateController');     // private route
 
 router.get("/users", debug, getUserList);                       // http://localhost:9001/users     --for all users in the database
@@ -44,13 +45,13 @@ router.get("/communes", debug, getCommuneList);                 // http://localh
 
 router.get("/homepageinfo/:name", debug, getCommuneAccueilInfo) // http://localhost:9001/homepageinfo/champs-elysées --base on selected commune 
 
+router.get("/paymentlist", debug, getAllUsersPayment);         // http://localhost:9001/paymentlist --for payment list for all users
+
 router.post("/signup", debug, signupUserValidator, signupNewUser);      // http://localhost:9001/signup     --to signup new user
 
 router.post("/login", debug, loginUserValidator, login);        // http://localhost:9001/login   --to login for registered user
 
 router.post("/payment", debug, paymentValidator, payment);      // http://localhost:9001/payment --for currently logged in user
-
-// router.post("/paymentlist", debug, getAllUsersPayment);         // http://localhost:9001/paymentlist --for payment list for all users
 
 
 router.all("*", (req, res) => {

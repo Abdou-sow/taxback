@@ -10,14 +10,25 @@ const userModel = require('../Model/userModel');
 const paymentModel = require('../Model/paymentModel')
 const communeModel = require('../Model/communeModel');
 
-
 const getUserList = (async (req, res) => {
 
     console.log("En getUserList controller", req.body)
 
     try {
+        // find all records in user collection
 
-        const userlist = await userModel.find({})       // find all records in user collection
+        const userlist = await userModel.find().select(
+            {
+                _id: 1,
+                surname: 1,
+                firstname: 1,
+                dateofbirth: 1,
+                address_personal: 1,
+                address_activity: 1,
+                activityID: 1,
+                activity_communeID: 1,
+                telephone: 1
+            }).lean()
 
         res.json({
             message: "List of users currently available in database",
@@ -40,8 +51,20 @@ const getTelephoneNum = (async (req, res) => {
     console.log("Im in getTelephoneNum", req.params.telephone)
 
     try {
+        // find user given telephone number record from user list
 
-        const telephoneExist = await userModel.findOne({ telephone: req.params.telephone }).lean()     // find user given telephone number record from user list
+        const telephoneExist = await userModel.findOne({ telephone: req.params.telephone }).select(
+            {
+                _id: 1,
+                surname: 1,
+                firstname: 1,
+                dateofbirth: 1,
+                address_personal: 1,
+                address_activity: 1,
+                activityID: 1,
+                activity_communeID: 1,
+                telephone: 1
+            }).lean()
 
         console.log("userfound", telephoneExist)
 
@@ -77,26 +100,48 @@ const payment = (async (req, res) => {
 
     const userTelephone = req.body.telephone;
     const userAmount = req.body.amount;
+    const paidOn = new Date()
 
     try {
 
         const userInfo = await userModel.findOne({ telephone: userTelephone })      // pick user information from collection
 
-        if (userInfo) {
+        const userId = userInfo._id
 
-            console.log("User, Commune and Activity Commune", userInfo.telephone, userInfo.communeID, userInfo.activityID);
+        console.log("userId", userId)
 
-            // add new payment 
-            const addPayment = await paymentModel.create(
-                {
-                    userId: userInfo._id,
-                    amount: userAmount
-                })
+        try {
+
+
+        } catch (error) {
+            res.status(400).json({
+                message: "User is not registered or payment details not provided, payment cancelled",
+                userInfo
+            })
+        }
+
+        const paymentuserID = await paymentModel.findOne({ userId: userId })
+
+        console.log("paymentuserID", paymentuserID.userId)
+
+        if (paymentuserID) {
+
+            // paymentuserID.amount.push(userAmount)
+            // paymentuserID.datepaid.push(new Date())
+
+            // const newUpdatedAmount = paymentuserID.amount
+            // const newUpdatedDate = paymentuserID.datepaid
+
+            const currentPaymetStatus = await paymentModel.updateOne(
+                { userId: paymentuserID.userId },
+                { $push: { payment: { amount: userAmount, paidon: paidOn } } }
+            )
+
+            console.log("currentPaymetStatus", currentPaymetStatus)
 
             res.json({
                 message: "Payment added successfully",
-                addPayment,
-                userInfo
+                currentPaymetStatus
             })
 
         } else {
@@ -138,14 +183,26 @@ const getPaymentByUser = (async (req, res) => {
 
             // find all payment made by user based on his userID
 
-            const userPaymentList = await paymentModel.find(
-                {
-                    userId: userID
-                }).select(
-                    { userId: 1, amount: 1, created: 1 }
-                ).lean()
+            // const userPaymentList = await paymentModel.find(
+            //     { userId: userID }).select({ userId: 1, amount: 1, created: 1 }).lean()
 
-            console.log("userPaymentList", userPaymentList)
+            // console.log("userPaymentList", userPaymentList)
+
+            // const userPaymentList = await paymentModel.aggregate([
+            //     { $lookup: 
+            //     {
+            //         from: 'payment',
+            //         localField: 'userId',
+            //         foreignField: '_id',
+            //         as: 'payment'                    
+            //     }}
+            // ])
+
+            const userPaymentList = await paymentModel.find({ userId: userID }).populate('User').select(
+                {
+                    userId:1,
+                    payment:1
+                }).exec()
 
             // const paymentMade = await paymentModel.aggregate([
             //     {
@@ -159,7 +216,7 @@ const getPaymentByUser = (async (req, res) => {
 
             res.json({
                 message: "User Found",
-                telephoneExist,
+                // telephoneExist,
                 userPaymentList
             })
         } else {
@@ -187,51 +244,18 @@ const getAllUsersPayment = (async (req, res) => {
 
     try {
 
-        const telephoneExist = await userModel.find(
+        const userPaymentList = await paymentModel.find().select(
             {
-                telephone: 1,
-                surname: 1,
-                firstname: 1,
-                address_activity: 1
-            }).lean()     // find user given telephone number record from user list
-
-        const paymentMade = await paymentModel.aggregate([
-            {
-                $group: {
-                    _id: "$amount",
-                    timesPaid: { $sum: 1 }
-                },
+                userId:1,
+                payment:1
             }
-        ])
-        console.log("paymentMade", paymentMade)
+        ).lean()
+        // console.log("userPaymentList", userPaymentList)
 
         res.json({
             message: "List of all paid users",
-            telephoneExist,
-            paymentMade
+            userPaymentList
         })
-
-        // if (telephoneExist) {
-
-        //     const userID = telephoneExist._id;
-        //     console.log("userID and his telephone number is", userID, telephoneExist.telephone);
-
-        //     const userPaymentList = await paymentModel.find({ userId: userID }).lean()     // find all payment made by user based on his userID
-        //     console.log(userPaymentList)
-
-        //     res.json({
-        //         message: "User Found",
-        //         telephoneExist,
-        //         userPaymentList
-        //     })
-        // } else {
-
-        //     res.status(400).json({
-        //         message: "User not found",
-        //         telephoneExist
-
-        //     })
-        // }
 
     } catch (error) {
         console.log("Error while verifing the user telephone number")
@@ -248,8 +272,14 @@ const getCommuneInfo = (async (req, res) => {
     console.log("Im in getCommuneInfo", req.params.name)
 
     try {
+        // get information for given commune from commune collection    // 
 
-        const communeInfo = await communeModel.findOne({ name: req.params.name })   // get information for given commune from commune collection    // 
+        const communeInfo = await communeModel.findOne({ name: req.params.name }).select(
+            {
+                _id: 1,
+                name: 1,
+                information: 1
+            }).lean()
 
         console.log(communeInfo)
 
@@ -274,5 +304,6 @@ module.exports = {
     getTelephoneNum,
     payment,
     getCommuneInfo,
-    getPaymentByUser
+    getPaymentByUser,
+    getAllUsersPayment
 }

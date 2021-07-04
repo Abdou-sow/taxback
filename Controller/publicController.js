@@ -6,14 +6,19 @@ const { validationResult } = require('express-validator');  // to process error 
 const communeModel = require('../Model/communeModel');
 const activityModel = require('../Model/activityModel');
 
-
-
 const getActivityList = (async (req, res) => {
 
     console.log("Im in getActivityList", req.body)
 
     try {
-        const list = await activityModel.find({})       // find all records in activity collection
+        // find all records in activity collection
+
+        const list = await activityModel.find().select(
+            {
+                name:1,
+                prix:1
+
+            })
 
         res.json({
             message: "List of activity currently available in database",
@@ -34,8 +39,15 @@ const getCommuneList = (async (req, res) => {
 
     console.log("Im in getCommuneList", req.body)
 
-    try {
-        const list = await communeModel.find({})        // find all records in commune collection
+    try { 
+        // find all records in commune collection
+
+        const list = await communeModel.find().select(
+            {
+                _id: 1,
+                name: 1,
+                information: 1
+            }).lean()
 
         res.json({
             message: "List of Commune currently available in database",

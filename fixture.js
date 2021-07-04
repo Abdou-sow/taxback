@@ -140,11 +140,17 @@ const addUser = async () => {
     try {
 
         const communeDetails = await communeModel.findOne({ name: "champs-elysées" }).lean()     // take commune id to save in with user collection
+        const communeDetails1 = await communeModel.findOne({ name: "rue de rivoli" }).lean()     // take commune id to save in with user collection
 
         const activityDetails = await activityModel.findOne({ name: "vendeur" }).lean()  // take activity id to save in with user collection
+        const activityDetails1 = await activityModel.findOne({ name: "pharmacien" }).lean()  // take activity id to save in with user collection
+        
+
 
         console.log("activityDetails", activityDetails)
+        console.log("activityDetails", activityDetails1)
         console.log("communeDetails", communeDetails)
+        console.log("communeDetails", communeDetails1)
 
         await userModel.deleteMany({}).lean()
 
@@ -165,6 +171,8 @@ const addUser = async () => {
 
         console.log("The collection of User has been recreated with the database");
 
+        setTimeout(function () { addPayment() }, 3000 );     // will wait to get updated adduser collection to avoid promise error
+
     } catch (err) {
         console.log(err)
     }
@@ -183,6 +191,8 @@ const addPayment = async () => {
 
         console.log("User _id is ", userDetails._id)
 
+        console.log("Date.now", new Date().toISOString().split('T')[0])
+
         await paymentModel.deleteMany({}).lean()
 
         await paymentModel.insertMany([
@@ -190,52 +200,20 @@ const addPayment = async () => {
             {
                 userId: userDetails._id,
                 amount: "10",
-                date: { type: Date, default: Date.now }
+                datepaid: new Date()
             }
         ])
 
         console.log("The collection of Payment has been recreated with the database");
+
 
     } catch (err) {
         console.log(err)
     }
 }
 
-// create communeInfo collection
-
-// const addCommuneInfo = async () => {
-
-//     try {
-
-//         const communeDetails = await communeModel.findOne({ name: "champs-elysées" }).lean()     // take commune id to save in with user collection
-//         // console.log("communeDetails", communeDetails)
-
-//         await communeInfoModel.deleteMany({}).lean()
-
-//         await communeInfoModel.insertMany([
-
-//             {
-//                 communeID: communeDetails._id,
-//                 date: "2021/06/06",
-//                 travaux: "decoration",
-//                 place: "rue paster",
-//                 amount_spent: "5000"
-//             }
-//         ])
-
-//         console.log("The collection of CommuneInfo has been recreated with the database");
-
-//     } catch (err) {
-//         console.log(err)
-//     }
-// }
-
-
 addActivity();
-console.log("Please wait .....")
+
 addCommune();
-console.log("Please wait .....")
+
 setTimeout(function () { addUser() }, 3000);        // will wait to get updated activity/commune collection to avoid promise error
-console.log("Please wait .....")
-setTimeout(function () { addPayment() }, 10000 );     // will wait to get updated adduser collection to avoid promise error
-console.log("Please wait .....")
