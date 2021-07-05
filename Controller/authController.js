@@ -140,7 +140,7 @@ const login = (async (req, res) => {
 
     console.log("Im in login route")
 
-    const tokenExpire = "300s"      // setting for token expires in 300s(5 minutes)
+    const tokenExpire = "900s"      // setting for token expires in 300s(15 minutes)
 
     // console.log("req.body", req.body)
 

@@ -92,12 +92,12 @@ const addCommune = async () => {
             
             },
             {
-                name: "avenue victor hugo",
-                information: "victor hugo"
+                name: "bagnolet",
+                information: "La ville est située dans le Bassin parisien, dans la région Île-de-France. Elle est limitrophe de Paris, en banlieue est, dans le sud du département de la Seine-Saint-Denis. Elle fait partie de la petite couronne de Paris.Bagnolet est situé à moins de 6 km, à vol d'oiseau, de Notre-Dame de Paris1."
             },
             {
-                name: "avenue montaigne",
-                information: "montaigne"
+                name: "lilas",
+                information: "La ville est située sur la colline de Belleville dans la banlieue nord-est de Paris, au sud-ouest du département de la Seine-Saint-Denis. Sur son territoire se situe le point culminant du département, avec 131 mètres."
             },
             {
                 name: "rue de rivoli",

@@ -8,7 +8,6 @@ const signupUserValidator =
         body('dateofbirth').notEmpty(),
         body('address_personal').notEmpty().trim().escape().isLength({ min: 4, max: 75 }),
         body('address_activity').notEmpty().trim().escape().isLength({ min: 4, max: 75 }),
-        // body('personal_communeID').notEmpty().trim().escape(),
         body('activity_commune').notEmpty().trim().escape(),
         body('activity').notEmpty().trim().escape(),
         body('telephone').notEmpty().trim().escape().isInt().isLength({ min: 9 }),

@@ -9,6 +9,7 @@ const jwt = require('jsonwebtoken');    // to create jsonwebtoken
 const userModel = require('../Model/userModel');
 const paymentModel = require('../Model/paymentModel')
 const communeModel = require('../Model/communeModel');
+const activityModel = require('../Model/activityModel');
 
 const getUserList = (async (req, res) => {
 
@@ -67,12 +68,26 @@ const getTelephoneNum = (async (req, res) => {
             }).lean()
 
         console.log("userfound", telephoneExist)
+        
+        const activity = telephoneExist.activityID
+        const commune = telephoneExist.activity_communeID
+        
+        const userActivityName = await activityModel.findById(activity).exec()
+        const userCommuneName = await communeModel.findById(commune).exec()
+        
+        const userActivity = userActivityName.name
+        const activityCommune = userCommuneName.name
+
+        console.log("userActivityName ", userActivity)
+        console.log("activityCommune ", activityCommune)
 
         if (telephoneExist) {
 
             res.json({
                 message: "User Found",
-                telephoneExist
+                telephoneExist,
+                userActivity,
+                activityCommune
             })
         } else {
 
@@ -103,8 +118,9 @@ const payment = (async (req, res) => {
     const paidOn = new Date()
 
     try {
+        // pick user information from collection
 
-        const userInfo = await userModel.findOne({ telephone: userTelephone })      // pick user information from collection
+        const userInfo = await userModel.findOne({ telephone: userTelephone })
 
         const userId = userInfo._id
 
@@ -125,12 +141,6 @@ const payment = (async (req, res) => {
         console.log("paymentuserID", paymentuserID.userId)
 
         if (paymentuserID) {
-
-            // paymentuserID.amount.push(userAmount)
-            // paymentuserID.datepaid.push(new Date())
-
-            // const newUpdatedAmount = paymentuserID.amount
-            // const newUpdatedDate = paymentuserID.datepaid
 
             const currentPaymetStatus = await paymentModel.updateOne(
                 { userId: paymentuserID.userId },
@@ -181,6 +191,7 @@ const getPaymentByUser = (async (req, res) => {
             const userID = telephoneExist._id;
             console.log("userID and his telephone number is", userID, telephoneExist.telephone);
 
+            //******* */
             // find all payment made by user based on his userID
 
             // const userPaymentList = await paymentModel.find(
@@ -197,13 +208,15 @@ const getPaymentByUser = (async (req, res) => {
             //         as: 'payment'                    
             //     }}
             // ])
+            //******* */
 
             const userPaymentList = await paymentModel.find({ userId: userID }).populate('User').select(
                 {
-                    userId:1,
-                    payment:1
+                    userId: 1,
+                    payment: 1
                 }).exec()
 
+            //******* */
             // const paymentMade = await paymentModel.aggregate([
             //     {
             //         $group: {
@@ -213,6 +226,7 @@ const getPaymentByUser = (async (req, res) => {
             //     }
             // ])
             // console.log("paymentMade", paymentMade)
+            //******* */
 
             res.json({
                 message: "User Found",
@@ -240,17 +254,18 @@ const getPaymentByUser = (async (req, res) => {
 
 const getAllUsersPayment = (async (req, res) => {
 
-    console.log("Im in getPaymentByUser", req.body)
+    console.log("Im in getPaymentForAllUsers", req.body)
 
     try {
 
         const userPaymentList = await paymentModel.find().select(
             {
-                userId:1,
-                payment:1
+                userId: 1,
+                payment: 1
             }
         ).lean()
         // console.log("userPaymentList", userPaymentList)
+
 
         res.json({
             message: "List of all paid users",
