@@ -52,7 +52,6 @@ const modificationUserInfo = (async (req, res) => {
     console.log("Im in modificationUserInfo", req.params.telephone)
     console.log("New telephone number ", req.body.telephone)
 
-    
     try {
         
         // update user information by given telephone number
@@ -62,11 +61,24 @@ const modificationUserInfo = (async (req, res) => {
 
             console.log(`${req.params.telephone} telephone number exist and _id for this telephone is ${telephoneExist._id}`)
 
-            const updateUserInfo = await userModel.findByIdAndUpdate(telephoneExist._id, { telephone: req.body.telephone })
+            const updateUserInfo = await userModel.updateOne({_id: telephoneExist._id}, { telephone: req.body.telephone })
+
+            console.log("updateUserInfo", updateUserInfo)
+
+            const updatedInfo = await userModel.findOne({_id: telephoneExist._id}).select(
+                {
+                    _id: 1,
+                    surname: 1,
+                    firstname: 1,
+                    dateofbirth: 1,
+                    address_personal: 1,
+                    address_activity: 1,
+                    telephone: 1
+                }).lean()
 
             res.json({
-                message: `Telephone number ${req.params.telephone} changed with ${newTelephoneNumber} number`,
-                updateUserInfo
+                message: `Telephone number ${req.params.telephone} changed with ${req.body.telephone} number`,
+                updatedInfo
             })
 
         } else {
@@ -77,11 +89,8 @@ const modificationUserInfo = (async (req, res) => {
             })
         }
         
-        // const updateUserInfo = await userModel.findOneAndUpdate({ telephone: 'Jean-Luc Picard' }, { ship: 'USS Enterprise' });
-        
-        
     } catch (error) {
-        console.error("Error while updating user information")
+        console.error("Error while updating user information", error)
     }
 
 })
@@ -190,9 +199,13 @@ const payment = (async (req, res) => {
 
             console.log("currentPaymetStatus", currentPaymetStatus)
 
+            const updatedPaymentStatus = await paymentModel.findOne({ userId: userId })
+            console.log("updatedPaymentStatus", updatedPaymentStatus)
+
             res.json({
                 message: "Payment added successfully",
-                currentPaymetStatus
+                currentPaymetStatus,
+                updatedPaymentStatus
             })
 
         } else {
