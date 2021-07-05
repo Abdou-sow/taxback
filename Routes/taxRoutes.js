@@ -2,8 +2,15 @@ const express = require('express')
 const router = express.Router();
 
 const { debug } = require('../Middleware/debug')
+
 const { signupUserValidator } = require('../Middleware/signupUserValidator')
-const { loginUserValidator } = require('../Middleware/loginUserValidator')
+
+const
+    {
+        loginUserValidator,
+        userModificationValidator
+    } = require('../Middleware/loginUserValidator')
+
 const { paymentValidator } = require('../Middleware/paymentValidation');
 
 const verifyToken = require('../Middleware/verifyToken');
@@ -11,7 +18,7 @@ const verifyToken = require('../Middleware/verifyToken');
 const
     {
         signupNewUser,
-        login 
+        login
     } = require('../Controller/authController');       // route auth
 
 const
@@ -25,6 +32,7 @@ const
     {
         getUserList,
         getTelephoneNum,
+        modificationUserInfo,
         payment,
         getCommuneInfo,
         getPaymentByUser,
@@ -53,6 +61,7 @@ router.post("/login", debug, loginUserValidator, login);        // http://localh
 
 router.post("/payment", debug, paymentValidator, payment);      // http://localhost:9001/payment --for currently logged in user
 
+router.put("/modif/:telephone", debug, userModificationValidator, modificationUserInfo)
 
 router.all("*", (req, res) => {
     res.status(404).json({

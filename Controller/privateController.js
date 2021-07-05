@@ -47,6 +47,45 @@ const getUserList = (async (req, res) => {
     }
 })
 
+const modificationUserInfo = (async (req, res) => {
+
+    console.log("Im in modificationUserInfo", req.params.telephone)
+    console.log("New telephone number ", req.body.telephone)
+
+    
+    try {
+        
+        // update user information by given telephone number
+        const telephoneExist = await userModel.findOne({ telephone: req.params.telephone }).lean()
+
+        if (telephoneExist) {
+
+            console.log(`${req.params.telephone} telephone number exist and _id for this telephone is ${telephoneExist._id}`)
+
+            const updateUserInfo = await userModel.findByIdAndUpdate(telephoneExist._id, { telephone: req.body.telephone })
+
+            res.json({
+                message: `Telephone number ${req.params.telephone} changed with ${newTelephoneNumber} number`,
+                updateUserInfo
+            })
+
+        } else {
+            console.log("User telephone number does not exist in the list", req.params.telephone)
+            
+            res.json({
+                message: `User telephone number ${req.params.telephone} does not exist in the list`
+            })
+        }
+        
+        // const updateUserInfo = await userModel.findOneAndUpdate({ telephone: 'Jean-Luc Picard' }, { ship: 'USS Enterprise' });
+        
+        
+    } catch (error) {
+        console.error("Error while updating user information")
+    }
+
+})
+
 const getTelephoneNum = (async (req, res) => {
 
     console.log("Im in getTelephoneNum", req.params.telephone)
@@ -68,14 +107,15 @@ const getTelephoneNum = (async (req, res) => {
             }).lean()
 
         console.log("userfound", telephoneExist)
-        
+
         const activity = telephoneExist.activityID
         const commune = telephoneExist.activity_communeID
-        
+
         const userActivityName = await activityModel.findById(activity).exec()
         const userCommuneName = await communeModel.findById(commune).exec()
-        
+
         const userActivity = userActivityName.name
+        const userActivityPrix = userActivityName.prix
         const activityCommune = userCommuneName.name
 
         console.log("userActivityName ", userActivity)
@@ -87,6 +127,7 @@ const getTelephoneNum = (async (req, res) => {
                 message: "User Found",
                 telephoneExist,
                 userActivity,
+                userActivityPrix,
                 activityCommune
             })
         } else {
@@ -317,6 +358,7 @@ const getCommuneInfo = (async (req, res) => {
 module.exports = {
     getUserList,
     getTelephoneNum,
+    modificationUserInfo,
     payment,
     getCommuneInfo,
     getPaymentByUser,
