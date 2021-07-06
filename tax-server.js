@@ -4,7 +4,8 @@ const mongoose = require('mongoose');
 const app = express();
 
 const router = require('./Routes/taxRoutes');
-const debug = require('./Middleware/debug')
+
+const { debug } = require('./Middleware/debug');
 
 app.use(cors());
 app.use(express.json());
@@ -22,7 +23,7 @@ mongoose.connect("mongodb://localhost:27017/tax-commune", { useNewUrlParser: tru
     }
 });
 
-app.use("/", router)
+app.use("/", debug, router)
 
 app.listen(port, () => {
     console.log("Ecoute en port: ", port)

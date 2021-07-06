@@ -13,7 +13,7 @@ const userModificationValidator =
     [
         body('surname').notEmpty().trim().escape(),
         body('firstname').notEmpty().trim().escape(),
-        body('addresspersonal').notEmpty().trim().escape().isLength({ min: 4, max: 150 }),
+        body('address_personal').notEmpty().trim().escape().isLength({ min: 4, max: 150 }),
         body("telephone").not().isEmpty().trim().escape().isInt().isLength({ min: 9, max: 9 }),
     ]
 

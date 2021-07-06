@@ -99,20 +99,20 @@ const signupNewUser = (async (req, res, next) => {
                         password: password
                     })
 
-                    const userAccountAdded = await paymentModel.insertMany([
-                        {
-                            userId: userAdded._id,
-                            // amount: "0",
-                            // datepaid: new Date()
-                            payment: { amount: "10", paidon: new Date() }
-                        }
-                    ])
-                    
-                    res.json({
-                        message: "User successfully added",
-                        userAdded,
-                        userAccountAdded
-                    })
+                const userAccountAdded = await paymentModel.insertMany([
+                    {
+                        userId: userAdded._id,
+                        // amount: "0",
+                        // datepaid: new Date()
+                        payment: { amount: "10", paidon: new Date() }
+                    }
+                ])
+
+                res.json({
+                    message: "User successfully added",
+                    userAdded,
+                    userAccountAdded
+                })
 
             } else {
 
@@ -144,46 +144,55 @@ const login = (async (req, res) => {
 
     // console.log("req.body", req.body)
 
-    const userTelephone = req.body.telephone
-    const userPassword = req.body.password
-
     try {
 
-        console.log("req.body", req.body)
+        const errorVal = validationResult(req);
 
-        // const passwordHash = bcrypt.hashSync(userPassword);
+        const userTelephone = req.body.telephone
+        const userPassword = req.body.password
 
-        // console.log("passwordHash", passwordHash)
+        if (errorVal.isEmpty()) {
 
-        const telephoneExist = await userModel.findOne({ telephone: userTelephone })    // check is the user registered in collection
+            const telephoneExist = await userModel.findOne({ telephone: userTelephone })    // check is the user registered in collection
 
-        const validPassword = bcrypt.compareSync(userPassword, telephoneExist.password)     // if yes, compare the user password  with saved password 
+            const validPassword = bcrypt.compareSync(userPassword, telephoneExist.password)     // if yes, compare the user password  with saved password 
 
-        // console.log("telephoneExist.password", telephoneExist.password)
+            // console.log("telephoneExist.password", telephoneExist.password)
 
-        console.log("validPassword", validPassword)
+            console.log("validPassword", validPassword)
 
-        if (validPassword) {
+            if (validPassword) {
 
-            const validToken = await jwt.sign({     // creates token using jwt with "secret" code and time to expires the token
-                id: telephoneExist._id
-            }, "secret", {      // config.secret,   // when you connect with congig.js file use this
-                expiresIn: tokenExpire       // token expiry time mentioned in const above
-            })
+                const validToken = await jwt.sign({     // creates token using jwt with "secret" code and time to expires the token
+                    id: telephoneExist._id
+                }, "secret", {      // config.secret,   // when you connect with congig.js file use this
+                    expiresIn: tokenExpire       // token expiry time mentioned in const above
+                })
 
-            res.json({                                                                  // pass on login details to frontend for further process
-                message: `${telephoneExist.surname}, ${userTelephone} is logged in`,
-                telephoneExist,
-                validToken,
-                tokenExpire
-            })
+                res.json({                                                                  // pass on login details to frontend for further process
+                    message: `${telephoneExist.surname}, ${userTelephone} is logged in`,
+                    telephoneExist,
+                    validToken,
+                    tokenExpire
+                })
+
+            } else {
+
+                res.status(400).json({
+                    message: `User ${userTelephone} login problem`
+                })
+            }
 
         } else {
 
-            res.status(400).json({
-                message: `User ${userTelephone} login problem`
+            console.log("Please verify your details matches the regulation");
+
+            res.json({
+                message: `Error while login ${userTelephone}`,
+                errorVal
             })
         }
+
     } catch (error) {
         console.error("Error in login", error)
         res.json({

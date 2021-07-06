@@ -17,8 +17,7 @@ const paymentSchema = new Schema(
             ref: "User"
         },
         amount: { type: Number, require: true },
-        paidon: { type: Date },
-        created: { type: Date, default: Date.now }
+        paidon: { type: Date }
     }
 );
 
