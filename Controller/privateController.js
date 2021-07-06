@@ -49,11 +49,23 @@ const getUserList = (async (req, res) => {
 
 const modificationUserInfo = (async (req, res) => {
 
+    try {
+
+    const errorVal = validationResult(req);
+
     console.log("Im in modificationUserInfo", req.params.telephone)
     console.log("New telephone number ", req.body.telephone)
 
-    try {
-        
+    const oldTelephone = req.params.telephone
+    const newTelephone = req.body.telephone
+    const newFirstname = req.body.firstname
+    const newsurname = req.body.surname
+    const newAddresspersonal = req.body.address_personal
+    console.log("newAddresspersonal", newAddresspersonal)
+
+    // return res.json()
+
+
         // update user information by given telephone number
         const telephoneExist = await userModel.findOne({ telephone: req.params.telephone }).lean()
 
@@ -61,39 +73,67 @@ const modificationUserInfo = (async (req, res) => {
 
             console.log(`${req.params.telephone} telephone number exist and _id for this telephone is ${telephoneExist._id}`)
 
-            const updateUserInfo = await userModel.updateOne({_id: telephoneExist._id}, { telephone: req.body.telephone })
+            // const updateUserInfo = await userModel.updateOne({ _id: telephoneExist._id }, { telephone: req.body.telephone }) //working
+
+            const updateUserInfo = await userModel.updateOne({_id: telephoneExist._id},            // not working
+                {
+                    "$set": {
+                        "telephone": newTelephone,
+                        "firstname": newFirstname,
+                        "surname": newsurname,
+                        "address_personal": newAddresspersonal
+                    }
+                }, {upsert: true}).lean()
 
             console.log("updateUserInfo", updateUserInfo)
 
-            const updatedInfo = await userModel.findOne({_id: telephoneExist._id}).select(
+            const updatedInfo = await userModel.findOne({ _id: telephoneExist._id }).select(
                 {
                     _id: 1,
                     surname: 1,
                     firstname: 1,
-                    dateofbirth: 1,
                     address_personal: 1,
                     address_activity: 1,
                     telephone: 1
                 }).lean()
 
             res.json({
-                message: `Telephone number ${req.params.telephone} changed with ${req.body.telephone} number`,
+                message: `Telephone number ${oldTelephone} replaced with ${newTelephone} number`,
                 updatedInfo
             })
 
         } else {
             console.log("User telephone number does not exist in the list", req.params.telephone)
-            
+
             res.json({
                 message: `User telephone number ${req.params.telephone} does not exist in the list`
             })
         }
-        
+
     } catch (error) {
         console.error("Error while updating user information", error)
     }
 
 })
+
+//************* */
+
+// const updateUserInfo = await userModel.useFindAndModify(telephoneExist._id ,            // not working
+//     { telephone: newTelephone, 
+//      firstname: newFirstname, 
+//      surname: newsurname, 
+//   
+
+// {
+//     "telephone":148389999,
+//     "firstname": "boris",
+//     "surname": "johnson",
+//     "address_personal": "no10 dowining street,london"
+// }
+
+//************* */
+
+
 
 const getTelephoneNum = (async (req, res) => {
 
@@ -169,51 +209,52 @@ const payment = (async (req, res) => {
 
     try {
         // pick user information from collection
-
+        
         const userInfo = await userModel.findOne({ telephone: userTelephone })
+        
+        if(userInfo) {
+            
+            const userId = userInfo._id
+            console.log("userId", userId)
 
-        const userId = userInfo._id
+            const paymentuserID = await paymentModel.findOne({ userId: userId })
+    
+            console.log("paymentuserID", paymentuserID.userId)
+    
+            if (paymentuserID) {
+    
+                // const currentPaymetStatus = await paymentModel.updateOne(
+                //     { userId: paymentuserID.userId },
+                //     { $push: { payment: { amount: userAmount, paidon: paidOn } } }
+                // )
+    
+                const paymentMade = await paymentModel.create(
+                    {
+                        userId: paymentuserID.userId,
+                        amount: userAmount,
+                        paidon: paidOn
+                    })
+    
+                res.json({
+                    message: "Payment added successfully",
+                    paymentMade
+                })
+    
+            } else {
+    
+                res.status(400).json({
+                    message: "User is not registered or user information not available, payment cancelled",
+                    userInfo
+                })
+            }
+        } else {
 
-        console.log("userId", userId)
-
-        try {
-
-
-        } catch (error) {
+            console.error("User is not registered or payment details not provided, payment cancelled")
             res.status(400).json({
                 message: "User is not registered or payment details not provided, payment cancelled",
                 userInfo
             })
-        }
 
-        const paymentuserID = await paymentModel.findOne({ userId: userId })
-
-        console.log("paymentuserID", paymentuserID.userId)
-
-        if (paymentuserID) {
-
-            const currentPaymetStatus = await paymentModel.updateOne(
-                { userId: paymentuserID.userId },
-                { $push: { payment: { amount: userAmount, paidon: paidOn } } }
-            )
-
-            console.log("currentPaymetStatus", currentPaymetStatus)
-
-            const updatedPaymentStatus = await paymentModel.findOne({ userId: userId })
-            console.log("updatedPaymentStatus", updatedPaymentStatus)
-
-            res.json({
-                message: "Payment added successfully",
-                currentPaymetStatus,
-                updatedPaymentStatus
-            })
-
-        } else {
-
-            res.status(400).json({
-                message: "User is not registered or user information not available, payment cancelled",
-                userInfo
-            })
         }
 
     } catch (error) {
@@ -224,6 +265,8 @@ const payment = (async (req, res) => {
 const getPaymentByUser = (async (req, res) => {
 
     console.log("Im in getPaymentByUser", req.params.telephone)
+
+    const user = req.params.telephone
 
     try {
 
@@ -245,30 +288,25 @@ const getPaymentByUser = (async (req, res) => {
             const userID = telephoneExist._id;
             console.log("userID and his telephone number is", userID, telephoneExist.telephone);
 
+
+            // find all payment made by user based on userID
+
+            const userPaymentList = await paymentModel.find(
+                { userId: userID }).select({ _id: 1, amount: 1, paidon: 1 }).lean()
+
+            console.log("userPaymentList", userPaymentList)
+
             //******* */
-            // find all payment made by user based on his userID
-
-            // const userPaymentList = await paymentModel.find(
-            //     { userId: userID }).select({ userId: 1, amount: 1, created: 1 }).lean()
-
-            // console.log("userPaymentList", userPaymentList)
-
             // const userPaymentList = await paymentModel.aggregate([
             //     { $lookup: 
             //     {
-            //         from: 'payment',
+            //         from: 'user',
             //         localField: 'userId',
             //         foreignField: '_id',
             //         as: 'payment'                    
             //     }}
             // ])
             //******* */
-
-            const userPaymentList = await paymentModel.find({ userId: userID }).populate('User').select(
-                {
-                    userId: 1,
-                    payment: 1
-                }).exec()
 
             //******* */
             // const paymentMade = await paymentModel.aggregate([
@@ -283,8 +321,9 @@ const getPaymentByUser = (async (req, res) => {
             //******* */
 
             res.json({
-                message: "User Found",
-                // telephoneExist,
+                message: "Payment Details",
+                user,
+                userID,
                 userPaymentList
             })
         } else {
@@ -315,7 +354,8 @@ const getAllUsersPayment = (async (req, res) => {
         const userPaymentList = await paymentModel.find().select(
             {
                 userId: 1,
-                payment: 1
+                amount: 1,
+                paidon: 1
             }
         ).lean()
         // console.log("userPaymentList", userPaymentList)

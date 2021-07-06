@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const app = express();
 
 const router = require('./Routes/taxRoutes');
+const debug = require('./Middleware/debug')
 
 app.use(cors());
 app.use(express.json());

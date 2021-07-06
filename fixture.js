@@ -191,7 +191,7 @@ const addPayment = async () => {
 
         console.log("User _id is ", userDetails._id)
 
-        console.log("Date.now", new Date().toISOString().split('T')[0])
+        // console.log("Date.now", new Date().toISOString().split('T')[0])
 
         await paymentModel.deleteMany({}).lean()
 
@@ -199,8 +199,8 @@ const addPayment = async () => {
 
             {
                 userId: userDetails._id,
-                amount: "10",
-                datepaid: new Date()
+                amount: "5",
+                paidon: new Date()
             }
         ])
 

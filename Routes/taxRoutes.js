@@ -61,7 +61,7 @@ router.post("/login", debug, loginUserValidator, login);        // http://localh
 
 router.post("/payment", debug, paymentValidator, payment);      // http://localhost:9001/payment --for currently logged in user
 
-router.put("/modif/:telephone", debug, userModificationValidator, modificationUserInfo)
+router.put("/modif/:telephone", debug, userModificationValidator, modificationUserInfo)     // http://localhost:9001/modif/148381111  modify current user telephone
 
 router.all("*", (req, res) => {
     res.status(404).json({
