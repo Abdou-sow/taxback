@@ -13,9 +13,10 @@ const activityModel = require('../Model/activityModel');
 
 const getUserList = (async (req, res) => {
 
-    console.log("En getUserList controller", req.body)
-
     try {
+
+        // console.log("En getUserList controller", req.body)
+
         // find all records in user collection
 
         const userlist = await userModel.find().select(
@@ -38,10 +39,10 @@ const getUserList = (async (req, res) => {
 
     } catch (error) {
 
-        console.log("Error en user list", error)
+        // console.log("Error en user list", error)
 
-        res.json({
-            message: "Error en user list",
+        res.status(400).json({
+            message: "Error while getting user list",
             error
         })
     }
@@ -49,21 +50,21 @@ const getUserList = (async (req, res) => {
 
 const modificationUserInfo = (async (req, res) => {
 
-    // update user information by given telephone number
-
     try {
+
+    // update user information by given telephone number
 
         const errorVal = validationResult(req);
 
-        console.log("Im in modificationUserInfo", req.params.telephone)
-        console.log("New telephone number ", req.body.telephone)
+        // console.log("Im in modificationUserInfo", req.params.telephone)
+        // console.log("New telephone number ", req.body.telephone)
 
         const oldTelephone = req.params.telephone
         const newTelephone = req.body.telephone
         const newFirstname = req.body.firstname
         const newsurname = req.body.surname
         const newAddresspersonal = req.body.address_personal
-        console.log("newAddresspersonal", newAddresspersonal)
+        // console.log("newAddresspersonal", newAddresspersonal)
 
         // return res.json()
 
@@ -73,7 +74,7 @@ const modificationUserInfo = (async (req, res) => {
 
             if (telephoneExist) {
 
-                console.log(`${req.params.telephone} telephone number exist and _id for this telephone is ${telephoneExist._id}`)
+                // console.log(`${req.params.telephone} telephone number exist and _id for this telephone is ${telephoneExist._id}`)
 
                 // const updateUserInfo = await userModel.updateOne({ _id: telephoneExist._id }, { telephone: req.body.telephone }) //working
 
@@ -87,7 +88,7 @@ const modificationUserInfo = (async (req, res) => {
                         }
                     }, { upsert: true }).lean()
 
-                console.log("updateUserInfo", updateUserInfo)
+                // console.log("updateUserInfo", updateUserInfo)
 
                 const updatedInfo = await userModel.findOne({ _id: telephoneExist._id }).select(
                     {
@@ -105,7 +106,7 @@ const modificationUserInfo = (async (req, res) => {
                 })
 
             } else {
-                console.log("User telephone number does not exist in the list", req.params.telephone)
+                // console.log("User telephone number does not exist in the list", req.params.telephone)
 
                 res.json({
                     message: `User telephone number ${req.params.telephone} does not exist in the list`
@@ -114,28 +115,32 @@ const modificationUserInfo = (async (req, res) => {
 
         } else {
 
-            console.log("Please verify that your details matches the regulation");
+            // console.log("Please verify that your details matches the regulation");
 
             res.json({
-                message: `Error while processing your ${oldTelephone, newTelephone,newFirstname, newsurname, newAddresspersonal}`,
+                message: `Error while processing your ${oldTelephone, newTelephone, newFirstname, newsurname, newAddresspersonal}`,
                 errorVal
             })
         }
 
     } catch (error) {
-        console.error("Error while updating user information", errorVal)
+        // console.error("Error while updating user information", errorVal)
+        res.status(400).json({
+            message: "Error while updating user information",
+            errorVal
+        })
     }
 
 })
 
 const getTelephoneNum = (async (req, res) => {
 
-    console.log("Im in getTelephoneNum", req.params.telephone)
+    // console.log("Im in getTelephoneNum", req.params.telephone)
 
     try {
         // find user given telephone number record from user list
 
-        const telephoneExist = await userModel.findOne({ telephone: req.params.telephone }).select(
+        const validUser = await userModel.findOne({ telephone: req.params.telephone }).select(
             {
                 _id: 1,
                 surname: 1,
@@ -148,10 +153,10 @@ const getTelephoneNum = (async (req, res) => {
                 telephone: 1
             }).lean()
 
-        console.log("userfound", telephoneExist)
+        // console.log("userfound", validUser)
 
-        const activity = telephoneExist.activityID
-        const commune = telephoneExist.activity_communeID
+        const activity = validUser.activityID
+        const commune = validUser.activity_communeID
 
         const userActivityName = await activityModel.findById(activity).exec()
         const userCommuneName = await communeModel.findById(commune).exec()
@@ -160,14 +165,14 @@ const getTelephoneNum = (async (req, res) => {
         const userActivityPrix = userActivityName.prix
         const activityCommune = userCommuneName.name
 
-        console.log("userActivityName ", userActivity)
-        console.log("activityCommune ", activityCommune)
+        // console.log("userActivityName ", userActivity)
+        // console.log("activityCommune ", activityCommune)
 
-        if (telephoneExist) {
+        if (validUser) {
 
             res.json({
                 message: "User Found",
-                telephoneExist,
+                validUser,
                 userActivity,
                 userActivityPrix,
                 activityCommune
@@ -176,7 +181,7 @@ const getTelephoneNum = (async (req, res) => {
 
             res.status(400).json({
                 message: "User not found",
-                telephoneExist
+                validUser
 
             })
         }
@@ -184,7 +189,7 @@ const getTelephoneNum = (async (req, res) => {
     } catch (error) {
         console.log("Error while verifing the user telephone number")
 
-        res.json({
+        res.status(400).json({
             message: "Error while verifing the user telephone number",
             error
         })
@@ -193,10 +198,9 @@ const getTelephoneNum = (async (req, res) => {
 
 const payment = (async (req, res) => {
 
-    console.log("Im in payment route")
-    // const userPaymentDetail = req.body;
-
     try {
+
+    // console.log("Im in payment route")
 
         const errorVal = validationResult(req);
 
@@ -213,18 +217,13 @@ const payment = (async (req, res) => {
             if (userInfo) {
 
                 const userId = userInfo._id
-                console.log("userId", userId)
+                // console.log("userId", userId)
 
                 const paymentuserID = await paymentModel.findOne({ userId: userId })
 
-                console.log("paymentuserID", paymentuserID.userId)
+                // console.log("paymentuserID", paymentuserID.userId)
 
                 if (paymentuserID) {
-
-                    // const currentPaymetStatus = await paymentModel.updateOne(
-                    //     { userId: paymentuserID.userId },
-                    //     { $push: { payment: { amount: userAmount, paidon: paidOn } } }
-                    // )
 
                     const paymentMade = await paymentModel.create(
                         {
@@ -247,38 +246,43 @@ const payment = (async (req, res) => {
                 }
             } else {
 
-                console.error("User is not registered or payment details not provided, payment cancelled")
+                // console.error("User is not registered or payment details not provided, payment cancelled")
 
                 res.status(400).json({
                     message: "User is not registered or payment details not provided, payment cancelled",
                     userTelephone,
                     userAmount
                 })
-
             }
 
         } else {
 
-            console.log("Please verify that your details matches the regulation");
+            // console.log("Please verify that your details matches the regulation");
 
             res.json({
-                message: `Error while processing your ${userTelephone} and ${userAmount}`,
+                message: `Error while processing your ${userTelephone} and ${userAmount}, payment cancelled`,
                 errorVal
             })
         }
 
     } catch (error) {
-        console.log("Error while making payment", error)
+        // console.log("Error while making payment", error)
+
+        res.status(400).json({
+            message: `Error while processing your ${userTelephone} and ${userAmount}, payment cancelled`,
+            errorVal
+        })
     }
 })
 
 const getPaymentByUser = (async (req, res) => {
 
-    console.log("Im in getPaymentByUser", req.params.telephone)
+    // console.log("Im in getPaymentByUser", req.params.telephone)
+
+    try {
 
     const user = req.params.telephone
 
-    try {
 
         // find user given telephone number record from user list
 
@@ -291,12 +295,12 @@ const getPaymentByUser = (async (req, res) => {
                 address_activity: 1
             }).lean()
 
-        console.log("userfound", telephoneExist)
+        // console.log("userfound", telephoneExist)
 
         if (telephoneExist) {
 
             const userID = telephoneExist._id;
-            console.log("userID and his telephone number is", userID, telephoneExist.telephone);
+            // console.log("userID and his telephone number is", userID, telephoneExist.telephone);
 
 
             // find all payment made by user based on userID
@@ -304,31 +308,7 @@ const getPaymentByUser = (async (req, res) => {
             const userPaymentList = await paymentModel.find(
                 { userId: userID }).select({ _id: 1, amount: 1, paidon: 1 }).lean()
 
-            console.log("userPaymentList", userPaymentList)
-
-            //******* */
-            // const userPaymentList = await paymentModel.aggregate([
-            //     { $lookup: 
-            //     {
-            //         from: 'user',
-            //         localField: 'userId',
-            //         foreignField: '_id',
-            //         as: 'payment'                    
-            //     }}
-            // ])
-            //******* */
-
-            //******* */
-            // const paymentMade = await paymentModel.aggregate([
-            //     {
-            //         $group: {
-            //             _id: "$amount",
-            //             timesPaid: { $sum: 1 }
-            //         }
-            //     }
-            // ])
-            // console.log("paymentMade", paymentMade)
-            //******* */
+            // console.log("userPaymentList", userPaymentList)
 
             res.json({
                 message: "Payment Details",
@@ -346,7 +326,7 @@ const getPaymentByUser = (async (req, res) => {
         }
 
     } catch (error) {
-        console.log("Error while verifing the user telephone number")
+        // console.log("Error while verifing the user telephone number")
 
         res.json({
             message: "Error while verifing the user telephone number",
@@ -357,45 +337,48 @@ const getPaymentByUser = (async (req, res) => {
 
 const getAllUsersPayment = (async (req, res) => {
 
-    console.log("Im in getPaymentForAllUsers", req.body)
+    // console.log("Im in getPaymentForAllUsers", req.body)
 
     try {
 
-        // const userPaymentList = await paymentModel.find().select(
-        //     {
-        //         userId: 1,
-        //         amount: 1,
-        //         paidon: 1
-        //     }
-        // ).lean()
+        const userPaymentList1 = await paymentModel.aggregate([{
+            $lookup: {
+                from: "User",
+                localField: "userId",
+                foreignField: "_id",
+                as: "paymentList"
 
-        const userPaymentList = await paymentModel.find().populate({ path: 'userId', select: ('surname') }).select(
+            }
+        }])
+
+        // console.log("userPaymentList1", userPaymentList1)
+
+        const userPaymentList2 = await paymentModel.find().populate({ path: 'userId', select: ('surname') }).select(
             {
                 userId: 1,
                 amount: 1,
                 paidon: 1
             },
-            // {
-            //     $group: {
-            //         _id: "$amount",
-            //         num: { $sum: 1 }
-            //     }
-            // }
         ).lean()
 
-        console.log("userPaymentList", userPaymentList)
+        // console.log("userPaymentList2", userPaymentList2)
 
+        const userPaymentListSum = await paymentModel.aggregate([
+            { $group: { _id: null, amount: { $sum: "$amount" } } }
+        ])
+
+        // console.log("userPaymentListSum", userPaymentListSum)
 
 
         res.json({
             message: "List of all paid users",
-            userPaymentList
+            userPaymentList2
         })
 
     } catch (error) {
-        console.log("Error while verifing the user telephone number")
+        // console.log("Error while verifing the user telephone number")
 
-        res.json({
+        res.status(400).json({
             message: "Error while verifing the user telephone number",
             error
         })
@@ -404,7 +387,7 @@ const getAllUsersPayment = (async (req, res) => {
 
 const getCommuneInfo = (async (req, res) => {
 
-    console.log("Im in getCommuneInfo", req.params.name)
+    // console.log("Im in getCommuneInfo", req.params.name)
 
     try {
         // get information for given commune from commune collection    // 
@@ -416,7 +399,7 @@ const getCommuneInfo = (async (req, res) => {
                 information: 1
             }).lean()
 
-        console.log(communeInfo)
+        // console.log(communeInfo)
 
         res.json({
             message: `Details about ${req.params.name} commune`,

@@ -8,15 +8,16 @@ const activityModel = require('../Model/activityModel');
 
 const getActivityList = (async (req, res) => {
 
-    console.log("Im in getActivityList", req.body)
-
     try {
+
+        console.log("Im in getActivityList", req.body)
+
         // find all records in activity collection
 
         const list = await activityModel.find().select(
             {
-                name:1,
-                prix:1
+                name: 1,
+                prix: 1
 
             })
 
@@ -37,9 +38,10 @@ const getActivityList = (async (req, res) => {
 
 const getCommuneList = (async (req, res) => {
 
-    console.log("Im in getCommuneList", req.body)
+    try {
 
-    try { 
+        console.log("Im in getCommuneList", req.body)
+
         // find all records in commune collection
 
         const list = await communeModel.find().select(

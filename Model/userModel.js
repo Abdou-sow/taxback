@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-// Schema for user
+// Schema for user, _id has relationship with paymentModel as userId
 const userSchema = new Schema(
     {
         surname: { type: String, require: true },

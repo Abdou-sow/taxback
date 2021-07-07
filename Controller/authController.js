@@ -140,7 +140,10 @@ const login = (async (req, res) => {
 
     console.log("Im in login route")
 
-    const tokenExpire = "900s"      // setting for token expires in 300s(15 minutes)
+    const tokenExpire = "4h"      // setting for token expires in 4h
+
+    const userTelephone = req.body.telephone
+    const userPassword = req.body.password
 
     // console.log("req.body", req.body)
 
@@ -148,30 +151,29 @@ const login = (async (req, res) => {
 
         const errorVal = validationResult(req);
 
-        const userTelephone = req.body.telephone
-        const userPassword = req.body.password
-
         if (errorVal.isEmpty()) {
 
-            const telephoneExist = await userModel.findOne({ telephone: userTelephone })    // check is the user registered in collection
+            const validUser = await userModel.findOne({ telephone: userTelephone }).select({
+                surname: 1, firstname: 1, dateofbirth: 1, address_personal: 1, address_activity: 1, activity_communeID: 1, activityID: 1, telephone: 1, password:1
+            }).lean()    // check is the user registered in collection
 
-            const validPassword = bcrypt.compareSync(userPassword, telephoneExist.password)     // if yes, compare the user password  with saved password 
+            const validPassword = bcrypt.compareSync(userPassword, validUser.password)     // if yes, compare the user password  with saved password 
 
-            // console.log("telephoneExist.password", telephoneExist.password)
+            // console.log("validUser.password", validUser.password)
 
             console.log("validPassword", validPassword)
 
             if (validPassword) {
 
                 const validToken = await jwt.sign({     // creates token using jwt with "secret" code and time to expires the token
-                    id: telephoneExist._id
+                    id: validUser._id
                 }, "secret", {      // config.secret,   // when you connect with congig.js file use this
                     expiresIn: tokenExpire       // token expiry time mentioned in const above
                 })
 
                 res.json({                                                                  // pass on login details to frontend for further process
-                    message: `${telephoneExist.surname}, ${userTelephone} is logged in`,
-                    telephoneExist,
+                    message: `${validUser.surname}, ${userTelephone} is logged in`,
+                    validUser,
                     validToken,
                     tokenExpire
                 })

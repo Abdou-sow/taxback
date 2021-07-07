@@ -1,18 +1,10 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-// Schema for user
+// Schema for user, userId have relation to userModel _id
 const paymentSchema = new Schema(
     {
-        //     userId: { type: mongoose.Types.ObjectId,
-        //     ref: "User"},
-        // amount: [{ type: Number, require: true }],       // add as array without _id
-        // datepaid: [{type:Date }],
-        // payment: [{                                          // add as array with _id
-        //     amount: {type: Number},
-        //     paidon: {type: Date}
-        // }],
-        userId: {
+       userId: {
             type: mongoose.Types.ObjectId,
             ref: "User"
         },
