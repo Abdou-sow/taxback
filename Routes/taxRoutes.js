@@ -1,22 +1,29 @@
 const express = require('express')
 const router = express.Router();
 
-const { signupUserValidator } = require('../Middleware/signupUserValidator')
-
-const
-    {
-        loginUserValidator,
-        userModificationValidator
-    } = require('../Middleware/userValidator')
-
 const { paymentValidator } = require('../Middleware/paymentValidation');
 
+const {  signupUserValidator } = require('../Middleware/signupUserValidator');
+
+const { signupAdminValidator } = require('../Middleware/signupAdminValidatore');
+
+
+const
+{
+    loginUserValidator,
+    userModificationValidator
+} = require('../Middleware/userValidator')
+
 const verifyToken = require('../Middleware/verifyToken');
+
+const { getAdminList } = require('../Controller/adminController');
 
 const
     {
         signupNewUser,
-        login
+        login,
+        signupNewAdmin,
+        loginAdmin
     } = require('../Controller/authController');       // route auth
 
 const
@@ -37,7 +44,10 @@ const
         getAllUsersPayment
     } = require('../Controller/privateController');     // private route
 
+
 router.get("/users", getUserList);                       // http://localhost:9001/users     --for all users in the database
+
+router.get("/adminusers", getAdminList)                 // http://localhost:9001/adminusers  -- for all admin users from database
 
 router.get("/telephone/:telephone", getTelephoneNum)     // http://localhost:9001/telephone/148381111    --search by given telephone number
 
@@ -59,7 +69,13 @@ router.post("/login", loginUserValidator, login);        // http://localhost:900
 
 router.post("/payment", paymentValidator, payment);      // http://localhost:9001/payment --for currently logged in user
 
+router.post("/adminsignup", signupAdminValidator, signupNewAdmin)   // http://localhost:9001/adminsignup
+
+router.post("/adminlogin", loginUserValidator, loginAdmin); // http://localhost:9001/adminlogin
+
 router.put("/modif/:telephone", userModificationValidator, modificationUserInfo)     // http://localhost:9001/modif/148381111  modify current user telephone
+
+// router.delete("/deleteuser/:id", deleteUser)
 
 router.all("*", (req, res) => {
     res.status(404).json({

@@ -2,9 +2,8 @@ const mongoose = require('mongoose');
 const userModel = require('./Model/userModel');
 const communeModel = require('./Model/communeModel');
 const activityModel = require('./Model/activityModel')
-// const communeInfoModel = require('./Model/communeInfoModel');
 const paymentModel = require('./Model/paymentModel');
-// const communePageModel = require('./Model/communePageModel');
+const adminModel = require('./Model/adminModel');
 const bcrypt = require('bcryptjs');
 
 // connect to database
@@ -16,6 +15,46 @@ mongoose.connect("mongodb://localhost:27017/tax-commune", { useNewUrlParser: tru
         console.log("I'm connected to the database")
     }
 })
+
+// create admin collection
+
+const addAdmin = async () => {
+
+    const password = "!As123456"
+    const passwordHash = bcrypt.hashSync(password)
+
+    console.log(password, passwordHash)
+
+    try {
+
+        await adminModel.deleteMany({}).lean()
+
+        await adminModel.insertMany([
+
+            {
+                firstname: "gaelle",
+                surname: "petit",
+                role: "1",
+                telephone: "248382222",
+                password: passwordHash
+            },
+            {
+                firstname: "lean",
+                surname: "leandro",
+                role: "2",
+                telephone: "348383333",
+                password: passwordHash
+            }
+        ])
+
+        console.log("The collection of admin has been recreated with the database");
+
+        // setTimeout(function () { addPayment() }, 3000 );     // will wait to get updated addadmin collection to avoid promise error
+
+    } catch (err) {
+        console.log(err)
+    }
+}
 
 // create activity collection 
 
@@ -171,12 +210,13 @@ const addUser = async () => {
 
         console.log("The collection of User has been recreated with the database");
 
-        setTimeout(function () { addPayment() }, 3000 );     // will wait to get updated adduser collection to avoid promise error
+        // setTimeout(function () { addPayment() }, 3000 );     // will wait to get updated adduser collection to avoid promise error
 
     } catch (err) {
         console.log(err)
     }
 }
+
 // create payment collection
 
 const addPayment = async () => {
@@ -212,8 +252,10 @@ const addPayment = async () => {
     }
 }
 
-addActivity();
+addAdmin();
 
-addCommune();
+// addActivity();
 
-setTimeout(function () { addUser() }, 3000);        // will wait to get updated activity/commune collection to avoid promise error
+// addCommune();
+
+// setTimeout(function () { addUser() }, 3000);        // will wait to get updated activity/commune collection to avoid promise error

@@ -15,11 +15,9 @@ const getUserList = (async (req, res) => {
 
     try {
 
-        // console.log("En getUserList controller", req.body)
-
         // find all records in user collection
 
-        const userlist = await userModel.find().select(
+        const useList = await userModel.find().populate({ path: 'activityID', select: ['name'] }).select(
             {
                 _id: 1,
                 surname: 1,
@@ -30,11 +28,13 @@ const getUserList = (async (req, res) => {
                 activityID: 1,
                 activity_communeID: 1,
                 telephone: 1
-            }).lean()
+            },
+        ).lean()
 
         res.json({
             message: "List of users currently available in database",
-            userlist
+            // userlist,
+            useList
         })
 
     } catch (error) {
@@ -353,7 +353,7 @@ const getAllUsersPayment = (async (req, res) => {
 
         // console.log("userPaymentList1", userPaymentList1)
 
-        const userPaymentList2 = await paymentModel.find().populate({ path: 'userId', select: ('surname') }).select(
+        const userPaymentList2 = await paymentModel.find().populate({ path: 'userId', select: ['firstname','surname', 'telephone'] }).select(
             {
                 userId: 1,
                 amount: 1,
@@ -363,9 +363,9 @@ const getAllUsersPayment = (async (req, res) => {
 
         // console.log("userPaymentList2", userPaymentList2)
 
-        const userPaymentListSum = await paymentModel.aggregate([
-            { $group: { _id: null, amount: { $sum: "$amount" } } }
-        ])
+        // const userPaymentListSum = await paymentModel.aggregate([
+        //     { $group: { _id: null, amount: { $sum: "$amount" } } }
+        // ])
 
         // console.log("userPaymentListSum", userPaymentListSum)
 
