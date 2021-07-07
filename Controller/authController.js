@@ -16,8 +16,6 @@ const signupNewUser = (async (req, res, next) => {
 
     const errorVal = validationResult(req);
 
-    console.log("Im in user signup", req.body)
-
     const userSurname = req.body.surname
     const userFirstname = req.body.firstname
     const userDateofbirth = req.body.dateofbirth
@@ -28,17 +26,10 @@ const signupNewUser = (async (req, res, next) => {
     const userTelephone = req.body.telephone
     const userPassword = req.body.password
 
-    console.log(req.body)
-
-    // const hasErrors = !errorVal.isEmpty();
-
-    console.log("hasErrors:-", errorVal);
-
     try {
 
         const telephoneExist = await userModel.findOne({ telephone: req.body.telephone }).lean()    // check whether the user is already registered 
-        // console.log("userfound", telephoneExist)
-
+        
         if (telephoneExist) {
 
             res.json({
@@ -54,12 +45,6 @@ const signupNewUser = (async (req, res, next) => {
 
                 const addActivity = await activityModel.create({ name: userActivity })  // if user enters new activity save it in activity collection
 
-                console.log(`New activity "${userActivity}" is added to database`)
-
-                // res.json({
-                //     message: `New activity "${userActivity}" is added to database`,
-                //     addActivity
-                // })
             }
 
             const communeExist = await communeModel.findOne({ name: userActivityCommune }).lean()   // check the user entered new commune
@@ -68,12 +53,6 @@ const signupNewUser = (async (req, res, next) => {
 
                 const addCommune = await communeModel.create({ name: userActivityCommune, information: userActivityCommune })  // if user enters new commune save it in commune collection
 
-                console.log(`New Commune "${addCommune}" is added to database`)
-
-                // res.json({
-                //     message: `New Commune "${addCommune}" is added to database`,
-                //     addCommune
-                // })
             }
 
             if (errorVal.isEmpty()) {
@@ -81,9 +60,6 @@ const signupNewUser = (async (req, res, next) => {
                 const activityID = await activityModel.findOne({ name: userActivity }).lean()  // take activity id to save with user collection
 
                 const communeID = await communeModel.findOne({ name: userActivityCommune }).lean()     // take commune id to save with user collection
-
-                console.log("activityID", activityID)
-                console.log("communeID", communeID)
 
                 const password = bcrypt.hashSync(userPassword)       // crypts the given password in to Bearer Token
 
@@ -103,9 +79,8 @@ const signupNewUser = (async (req, res, next) => {
                 const userAccountAdded = await paymentModel.insertMany([
                     {
                         userId: userAdded._id,
-                        // amount: "0",
-                        // datepaid: new Date()
-                        payment: { amount: "10", paidon: new Date() }
+
+                        payment: { amount: activityID.prix, paidon: new Date() }
                     }
                 ])
 
@@ -117,8 +92,6 @@ const signupNewUser = (async (req, res, next) => {
 
             } else {
 
-                console.log("Please verify your details matches the regulation");
-
                 res.status(400).json({
                     message: `Error while processing your ${userTelephone} as new user`,
                     userTelephone,
@@ -128,8 +101,7 @@ const signupNewUser = (async (req, res, next) => {
         }
 
     } catch (error) {
-        console.error(`Error while processing your ${userTelephone} as new user`, error)
-
+        
         res.json({
             message: `Error while processing your ${userTelephone} as new user`,
             userTelephone
@@ -139,14 +111,10 @@ const signupNewUser = (async (req, res, next) => {
 
 const login = (async (req, res) => {
 
-    console.log("Im in login route")
-
     const tokenExpire = "4h"      // setting for token expires in 4h
 
     const userTelephone = req.body.telephone
     const userPassword = req.body.password
-
-    // console.log("req.body", req.body)
 
     try {
 
@@ -159,10 +127,6 @@ const login = (async (req, res) => {
             }).lean()    // check is the user registered in collection
 
             const validPassword = bcrypt.compareSync(userPassword, validUser.password)     // if yes, compare the user password  with saved password 
-
-            // console.log("validUser.password", validUser.password)
-
-            console.log("validPassword", validPassword)
 
             if (validPassword) {
 
@@ -188,8 +152,6 @@ const login = (async (req, res) => {
 
         } else {
 
-            console.log("Please verify your details matches the regulation");
-
             res.json({
                 message: `Error while login ${userTelephone}`,
                 errorVal
@@ -197,7 +159,7 @@ const login = (async (req, res) => {
         }
 
     } catch (error) {
-        console.error("Error in login", error)
+        
         res.json({
             message: `Error while login with user ${userTelephone}`,
             error
@@ -209,8 +171,6 @@ const signupNewAdmin = (async (req, res, next) => {
 
     const errorVal = validationResult(req);
 
-    // console.log("Im in admin signup", req.body)
-
     const userFirstname = req.body.firstname
     const userSurname = req.body.surname
     const userRole = req.body.role
@@ -218,8 +178,6 @@ const signupNewAdmin = (async (req, res, next) => {
     const userPassword = req.body.password
 
     let userRoleType=""
-
-    // console.log(req.body)
 
     if (errorVal.isEmpty()) {
 
@@ -235,19 +193,13 @@ const signupNewAdmin = (async (req, res, next) => {
 
             } else {
 
-                // console.log(`Invalid text in role :- ${userRole}`)
-
                 res.json({
                     message: `Invalid text in role :- ${userRole}`,
                     userRoleType
                 })
             }
 
-            // console.log("hasErrors:-", errorVal);
-
             const userExist = await adminModel.findOne({ telephone: userTelephone }).lean()    // check whether the user is already registered 
-
-            // console.log("userfound", userExist)
 
             if (userExist) {
 
@@ -276,8 +228,7 @@ const signupNewAdmin = (async (req, res, next) => {
             }
 
         } catch (error) {
-            // console.error(`Error while processing your ${userTelephone} as new user`, error)
-
+            
             res.json({
                 message: `Error while processing your ${userTelephone} as new user`,
                 userTelephone, 
@@ -287,8 +238,6 @@ const signupNewAdmin = (async (req, res, next) => {
         }
 
     } else {
-
-        console.log("Please verify your details matches the regulation");
 
         res.status(400).json({
             message: `Error while processing your ${userTelephone} as new user`,
@@ -301,14 +250,10 @@ const signupNewAdmin = (async (req, res, next) => {
 
 const loginAdmin = (async (req, res) => {
 
-    console.log("Im in login route")
-
     const tokenExpire = "4h"      // setting for token expires in 4h
 
     const userTelephone = req.body.telephone
     const userPassword = req.body.password
-
-    // console.log("req.body", req.body)
 
     try {
 
@@ -323,8 +268,6 @@ const loginAdmin = (async (req, res) => {
             if(validUser) {
 
                 const validPassword = bcrypt.compareSync(userPassword, validUser.password)     // if yes, compare the user password  with saved password 
-    
-                // console.log("validUser.password", validUser.password)
     
                 console.log("validPassword", validPassword)
     
@@ -357,8 +300,6 @@ const loginAdmin = (async (req, res) => {
             }
         } else {
 
-            // console.log("Please verify your details matches the regulation");
-
             res.json({
                 message: `Please verify your details matches the regulation, error while login ${userTelephone}`,
                 errorVal
@@ -366,7 +307,7 @@ const loginAdmin = (async (req, res) => {
         }
 
     } catch (error) {
-        // console.error("Error in login", error)
+        
         res.status(400).json({
             message: `Error while login user ${userTelephone}`,
             error

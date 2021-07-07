@@ -15,9 +15,9 @@ const getUserList = (async (req, res) => {
 
     try {
 
-        // find all records in user collection
+        // find all records in user and their activity name and prix details from user and activity collection
 
-        const useList = await userModel.find().populate({ path: 'activityID', select: ['name'] }).select(
+        const userList = await userModel.find().populate({ path: 'activityID', select: ['name', 'prix'] }).select(
             {
                 _id: 1,
                 surname: 1,
@@ -33,13 +33,10 @@ const getUserList = (async (req, res) => {
 
         res.json({
             message: "List of users currently available in database",
-            // userlist,
-            useList
+            userList
         })
 
     } catch (error) {
-
-        // console.log("Error en user list", error)
 
         res.status(400).json({
             message: "Error while getting user list",
@@ -52,31 +49,21 @@ const modificationUserInfo = (async (req, res) => {
 
     try {
 
-    // update user information by given telephone number
+        // update user information by given telephone number
 
         const errorVal = validationResult(req);
-
-        // console.log("Im in modificationUserInfo", req.params.telephone)
-        // console.log("New telephone number ", req.body.telephone)
 
         const oldTelephone = req.params.telephone
         const newTelephone = req.body.telephone
         const newFirstname = req.body.firstname
         const newsurname = req.body.surname
         const newAddresspersonal = req.body.address_personal
-        // console.log("newAddresspersonal", newAddresspersonal)
-
-        // return res.json()
 
         if (errorVal.isEmpty()) {
 
             const telephoneExist = await userModel.findOne({ telephone: req.params.telephone }).lean()
 
             if (telephoneExist) {
-
-                // console.log(`${req.params.telephone} telephone number exist and _id for this telephone is ${telephoneExist._id}`)
-
-                // const updateUserInfo = await userModel.updateOne({ _id: telephoneExist._id }, { telephone: req.body.telephone }) //working
 
                 const updateUserInfo = await userModel.updateOne({ _id: telephoneExist._id },            // not working
                     {
@@ -87,8 +74,6 @@ const modificationUserInfo = (async (req, res) => {
                             "address_personal": newAddresspersonal
                         }
                     }, { upsert: true }).lean()
-
-                // console.log("updateUserInfo", updateUserInfo)
 
                 const updatedInfo = await userModel.findOne({ _id: telephoneExist._id }).select(
                     {
@@ -106,7 +91,6 @@ const modificationUserInfo = (async (req, res) => {
                 })
 
             } else {
-                // console.log("User telephone number does not exist in the list", req.params.telephone)
 
                 res.json({
                     message: `User telephone number ${req.params.telephone} does not exist in the list`
@@ -115,8 +99,6 @@ const modificationUserInfo = (async (req, res) => {
 
         } else {
 
-            // console.log("Please verify that your details matches the regulation");
-
             res.json({
                 message: `Error while processing your ${oldTelephone, newTelephone, newFirstname, newsurname, newAddresspersonal}`,
                 errorVal
@@ -124,18 +106,15 @@ const modificationUserInfo = (async (req, res) => {
         }
 
     } catch (error) {
-        // console.error("Error while updating user information", errorVal)
+
         res.status(400).json({
             message: "Error while updating user information",
             errorVal
         })
     }
-
 })
 
 const getTelephoneNum = (async (req, res) => {
-
-    // console.log("Im in getTelephoneNum", req.params.telephone)
 
     try {
         // find user given telephone number record from user list
@@ -153,8 +132,6 @@ const getTelephoneNum = (async (req, res) => {
                 telephone: 1
             }).lean()
 
-        // console.log("userfound", validUser)
-
         const activity = validUser.activityID
         const commune = validUser.activity_communeID
 
@@ -165,9 +142,6 @@ const getTelephoneNum = (async (req, res) => {
         const userActivityPrix = userActivityName.prix
         const activityCommune = userCommuneName.name
 
-        // console.log("userActivityName ", userActivity)
-        // console.log("activityCommune ", activityCommune)
-
         if (validUser) {
 
             res.json({
@@ -177,6 +151,7 @@ const getTelephoneNum = (async (req, res) => {
                 userActivityPrix,
                 activityCommune
             })
+
         } else {
 
             res.status(400).json({
@@ -187,7 +162,6 @@ const getTelephoneNum = (async (req, res) => {
         }
 
     } catch (error) {
-        console.log("Error while verifing the user telephone number")
 
         res.status(400).json({
             message: "Error while verifing the user telephone number",
@@ -199,8 +173,6 @@ const getTelephoneNum = (async (req, res) => {
 const payment = (async (req, res) => {
 
     try {
-
-    // console.log("Im in payment route")
 
         const errorVal = validationResult(req);
 
@@ -217,11 +189,8 @@ const payment = (async (req, res) => {
             if (userInfo) {
 
                 const userId = userInfo._id
-                // console.log("userId", userId)
 
                 const paymentuserID = await paymentModel.findOne({ userId: userId })
-
-                // console.log("paymentuserID", paymentuserID.userId)
 
                 if (paymentuserID) {
 
@@ -246,8 +215,6 @@ const payment = (async (req, res) => {
                 }
             } else {
 
-                // console.error("User is not registered or payment details not provided, payment cancelled")
-
                 res.status(400).json({
                     message: "User is not registered or payment details not provided, payment cancelled",
                     userTelephone,
@@ -257,8 +224,6 @@ const payment = (async (req, res) => {
 
         } else {
 
-            // console.log("Please verify that your details matches the regulation");
-
             res.json({
                 message: `Error while processing your ${userTelephone} and ${userAmount}, payment cancelled`,
                 errorVal
@@ -266,7 +231,6 @@ const payment = (async (req, res) => {
         }
 
     } catch (error) {
-        // console.log("Error while making payment", error)
 
         res.status(400).json({
             message: `Error while processing your ${userTelephone} and ${userAmount}, payment cancelled`,
@@ -277,16 +241,13 @@ const payment = (async (req, res) => {
 
 const getPaymentByUser = (async (req, res) => {
 
-    // console.log("Im in getPaymentByUser", req.params.telephone)
-
     try {
 
-    const user = req.params.telephone
-
+        const user = req.params.telephone
 
         // find user given telephone number record from user list
 
-        const telephoneExist = await userModel.findOne({ telephone: req.params.telephone }).select(
+        const userExist = await userModel.findOne({ telephone: req.params.telephone }).select(
             {
                 _id: 1,
                 telephone: 1,
@@ -295,20 +256,14 @@ const getPaymentByUser = (async (req, res) => {
                 address_activity: 1
             }).lean()
 
-        // console.log("userfound", telephoneExist)
+        if (userExist) {
 
-        if (telephoneExist) {
-
-            const userID = telephoneExist._id;
-            // console.log("userID and his telephone number is", userID, telephoneExist.telephone);
-
-
+            const userID = userExist._id;
+            
             // find all payment made by user based on userID
 
             const userPaymentList = await paymentModel.find(
                 { userId: userID }).select({ _id: 1, amount: 1, paidon: 1 }).lean()
-
-            // console.log("userPaymentList", userPaymentList)
 
             res.json({
                 message: "Payment Details",
@@ -324,10 +279,8 @@ const getPaymentByUser = (async (req, res) => {
 
             })
         }
-
     } catch (error) {
-        // console.log("Error while verifing the user telephone number")
-
+        
         res.json({
             message: "Error while verifing the user telephone number",
             error
@@ -336,8 +289,6 @@ const getPaymentByUser = (async (req, res) => {
 })
 
 const getAllUsersPayment = (async (req, res) => {
-
-    // console.log("Im in getPaymentForAllUsers", req.body)
 
     try {
 
@@ -351,9 +302,7 @@ const getAllUsersPayment = (async (req, res) => {
             }
         }])
 
-        // console.log("userPaymentList1", userPaymentList1)
-
-        const userPaymentList2 = await paymentModel.find().populate({ path: 'userId', select: ['firstname','surname', 'telephone'] }).select(
+        const userPaymentList2 = await paymentModel.find().populate({ path: 'userId', select: ['firstname', 'surname', 'telephone'] }).select(
             {
                 userId: 1,
                 amount: 1,
@@ -361,23 +310,13 @@ const getAllUsersPayment = (async (req, res) => {
             },
         ).lean()
 
-        // console.log("userPaymentList2", userPaymentList2)
-
-        // const userPaymentListSum = await paymentModel.aggregate([
-        //     { $group: { _id: null, amount: { $sum: "$amount" } } }
-        // ])
-
-        // console.log("userPaymentListSum", userPaymentListSum)
-
-
         res.json({
             message: "List of all paid users",
             userPaymentList2
         })
 
     } catch (error) {
-        // console.log("Error while verifing the user telephone number")
-
+        
         res.status(400).json({
             message: "Error while verifing the user telephone number",
             error
@@ -386,8 +325,6 @@ const getAllUsersPayment = (async (req, res) => {
 })
 
 const getCommuneInfo = (async (req, res) => {
-
-    // console.log("Im in getCommuneInfo", req.params.name)
 
     try {
         // get information for given commune from commune collection    // 
@@ -398,8 +335,6 @@ const getCommuneInfo = (async (req, res) => {
                 name: 1,
                 information: 1
             }).lean()
-
-        // console.log(communeInfo)
 
         res.json({
             message: `Details about ${req.params.name} commune`,

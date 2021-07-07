@@ -16,7 +16,7 @@ const
 
 const verifyToken = require('../Middleware/verifyToken');
 
-const { getAdminList } = require('../Controller/adminController');
+const { getAdminList, deleteUser } = require('../Controller/adminController');
 
 const
     {
@@ -75,7 +75,7 @@ router.post("/adminlogin", loginUserValidator, loginAdmin); // http://localhost:
 
 router.put("/modif/:telephone", userModificationValidator, modificationUserInfo)     // http://localhost:9001/modif/148381111  modify current user telephone
 
-// router.delete("/deleteuser/:id", deleteUser)
+router.delete("/deleteuser/:id", deleteUser)        // http://localhost:9001/deleteuser/60e34a307e7f396786678127   delete user from user collection
 
 router.all("*", (req, res) => {
     res.status(404).json({
