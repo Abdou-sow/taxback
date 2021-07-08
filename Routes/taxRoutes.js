@@ -1,37 +1,36 @@
 const express = require('express')
 const router = express.Router();
 
-const { paymentValidator } = require('../Middleware/paymentValidation');
+const { paymentValidator, activityPrixValidator } = require('../Middleware/paymentValidation');
 
-const {  signupUserValidator } = require('../Middleware/signupUserValidator');
+const { signupUserValidator } = require('../Middleware/signupUserValidator');
 
 const { signupAdminValidator } = require('../Middleware/signupAdminValidatore');
 
+const
+    {
+        loginUserValidator,
+        userModificationValidator, communeValidator } = require('../Middleware/userValidator')
 
 const
-{
-    loginUserValidator,
-    userModificationValidator
-} = require('../Middleware/userValidator')
-
-const verifyToken = require('../Middleware/verifyToken');
-
-const { getAdminList, deleteUser } = require('../Controller/adminController');
+    {
+        getAdminList,
+        deleteUser,
+        addActivity,
+        addCommune } = require('../Controller/adminController');
 
 const
     {
         signupNewUser,
         login,
         signupNewAdmin,
-        loginAdmin
-    } = require('../Controller/authController');       // route auth
+        loginAdmin } = require('../Controller/authController');       // route auth
 
 const
     {
         getCommuneAccueilInfo,
         getActivityList,
-        getCommuneList
-    } = require('../Controller/publicController')       // public route
+        getCommuneList } = require('../Controller/publicController')       // public route
 
 const
     {
@@ -41,8 +40,7 @@ const
         payment,
         getCommuneInfo,
         getPaymentByUser,
-        getAllUsersPayment
-    } = require('../Controller/privateController');     // private route
+        getAllUsersPayment } = require('../Controller/privateController');     // private route
 
 
 router.get("/users", getUserList);                       // http://localhost:9001/users     --for all users in the database
@@ -76,6 +74,10 @@ router.post("/adminlogin", loginUserValidator, loginAdmin); // http://localhost:
 router.put("/modif/:telephone", userModificationValidator, modificationUserInfo)     // http://localhost:9001/modif/148381111  modify current user telephone
 
 router.delete("/deleteuser/:id", deleteUser)        // http://localhost:9001/deleteuser/60e34a307e7f396786678127   delete user from user collection
+
+router.post("/addactivity", activityPrixValidator, addActivity)     // http://localhost:9001/addactivity    add new activity and price
+
+router.post("/addcommune", communeValidator, addCommune)     // http://localhost:9001/addcommune    add new commune
 
 router.all("*", (req, res) => {
     res.status(404).json({

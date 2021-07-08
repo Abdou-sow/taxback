@@ -17,4 +17,10 @@ const userModificationValidator =
         body("telephone").not().isEmpty().trim().escape().isInt().isLength({ min: 9, max: 9 }),
     ]
 
-module.exports = { loginUserValidator, userModificationValidator };
+const communeValidator = 
+    [
+        body('commune').notEmpty().trim().escape().isLength({ min: 3, max: 25 }),
+
+    ]
+
+module.exports = { loginUserValidator, userModificationValidator, communeValidator };

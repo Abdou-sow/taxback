@@ -29,7 +29,7 @@ const signupNewUser = (async (req, res, next) => {
     try {
 
         const telephoneExist = await userModel.findOne({ telephone: req.body.telephone }).lean()    // check whether the user is already registered 
-        
+
         if (telephoneExist) {
 
             res.json({
@@ -79,8 +79,8 @@ const signupNewUser = (async (req, res, next) => {
                 const userAccountAdded = await paymentModel.insertMany([
                     {
                         userId: userAdded._id,
-
-                        payment: { amount: activityID.prix, paidon: new Date() }
+                        amount: activityID.prix, 
+                        paidon: new Date()
                     }
                 ])
 
@@ -101,7 +101,7 @@ const signupNewUser = (async (req, res, next) => {
         }
 
     } catch (error) {
-        
+
         res.json({
             message: `Error while processing your ${userTelephone} as new user`,
             userTelephone
@@ -159,7 +159,7 @@ const login = (async (req, res) => {
         }
 
     } catch (error) {
-        
+
         res.json({
             message: `Error while login with user ${userTelephone}`,
             error
@@ -177,7 +177,7 @@ const signupNewAdmin = (async (req, res, next) => {
     const userTelephone = req.body.telephone
     const userPassword = req.body.password
 
-    let userRoleType=""
+    let userRoleType = ""
 
     if (errorVal.isEmpty()) {
 
@@ -221,19 +221,19 @@ const signupNewAdmin = (async (req, res, next) => {
                     })
 
                 res.json({
-                    message:  `${userSurname} successfully added as ${userRoleType}`,
+                    message: `${userSurname} successfully added as ${userRoleType}`,
                     userAdded
                 })
 
             }
 
         } catch (error) {
-            
+
             res.json({
                 message: `Error while processing your ${userTelephone} as new user`,
-                userTelephone, 
+                userTelephone,
                 error
-                
+
             })
         }
 
@@ -265,29 +265,29 @@ const loginAdmin = (async (req, res) => {
                 surname: 1, firstname: 1, role: 1, telephone: 1, password: 1
             }).lean()    // check is the user registered in collection
 
-            if(validUser) {
+            if (validUser) {
 
                 const validPassword = bcrypt.compareSync(userPassword, validUser.password)     // if yes, compare the user password  with saved password 
-    
+
                 console.log("validPassword", validPassword)
-    
+
                 if (validPassword) {
-    
+
                     const validToken = await jwt.sign({     // creates token using jwt with "secret" code and time to expires the token
                         id: validUser._id
                     }, "secret", {      // config.secret,   // when you connect with congig.js file use this
                         expiresIn: tokenExpire       // token expiry time mentioned in const above
                     })
-    
+
                     res.json({                                                                  // pass on login details to frontend for further process
                         message: `${validUser.surname} ${validUser.firstname} is logged in as ${userTelephone}`,
                         validUser,
                         validToken,
                         tokenExpire
                     })
-    
+
                 } else {
-    
+
                     res.json({
                         message: `User ${userTelephone} login problem`
                     })
@@ -307,7 +307,7 @@ const loginAdmin = (async (req, res) => {
         }
 
     } catch (error) {
-        
+
         res.status(400).json({
             message: `Error while login user ${userTelephone}`,
             error

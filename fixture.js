@@ -16,46 +16,6 @@ mongoose.connect("mongodb://localhost:27017/tax-commune", { useNewUrlParser: tru
     }
 })
 
-// create admin collection
-
-const addAdmin = async () => {
-
-    const password = "!As123456"
-    const passwordHash = bcrypt.hashSync(password)
-
-    console.log(password, passwordHash)
-
-    try {
-
-        await adminModel.deleteMany({}).lean()
-
-        await adminModel.insertMany([
-
-            {
-                firstname: "gaelle",
-                surname: "petit",
-                role: "1",
-                telephone: "248382222",
-                password: passwordHash
-            },
-            {
-                firstname: "lean",
-                surname: "leandro",
-                role: "2",
-                telephone: "348383333",
-                password: passwordHash
-            }
-        ])
-
-        console.log("The collection of admin has been recreated with the database");
-
-        // setTimeout(function () { addPayment() }, 3000 );     // will wait to get updated addadmin collection to avoid promise error
-
-    } catch (err) {
-        console.log(err)
-    }
-}
-
 // create activity collection 
 
 const addActivity = async () => {
@@ -108,7 +68,7 @@ const addActivity = async () => {
             }
         ])
 
-        console.log("The collection of Activity has been recreated with the database");
+        console.log("The collection of Activity has being recreated with the database");
 
     } catch (err) {
         console.log(err)
@@ -171,26 +131,15 @@ const addCommune = async () => {
 
 const addUser = async () => {
 
-    const password = "!As1234567890"
+    const password = "!As123456"
     const passwordHash = bcrypt.hashSync(password)
-
-    console.log(password, passwordHash)
 
     try {
 
         const communeDetails = await communeModel.findOne({ name: "champs-elysées" }).lean()     // take commune id to save in with user collection
-        const communeDetails1 = await communeModel.findOne({ name: "rue de rivoli" }).lean()     // take commune id to save in with user collection
-
-        const activityDetails = await activityModel.findOne({ name: "vendeur" }).lean()  // take activity id to save in with user collection
-        const activityDetails1 = await activityModel.findOne({ name: "pharmacien" }).lean()  // take activity id to save in with user collection
         
-
-
-        console.log("activityDetails", activityDetails)
-        console.log("activityDetails", activityDetails1)
-        console.log("communeDetails", communeDetails)
-        console.log("communeDetails", communeDetails1)
-
+        const activityDetails = await activityModel.findOne({ name: "vendeur" }).lean()  // take activity id to save in with user collection
+        
         await userModel.deleteMany({}).lean()
 
         await userModel.insertMany([
@@ -210,8 +159,43 @@ const addUser = async () => {
 
         console.log("The collection of User has been recreated with the database");
 
-        // setTimeout(function () { addPayment() }, 3000 );     // will wait to get updated adduser collection to avoid promise error
+    } catch (err) {
+        console.log(err)
+    }
+}
 
+// create admin collection
+
+const addAdmin = async () => {
+
+    const password = "!As123456"
+    const passwordHash = bcrypt.hashSync(password)
+
+    try {
+
+        await adminModel.deleteMany({}).lean()
+
+        await adminModel.insertMany([
+
+            {
+                firstname: "gaelle",
+                surname: "petit",
+                role: "1",
+                telephone: "248382222",
+                password: passwordHash
+            },
+            {
+                firstname: "lean",
+                surname: "leandro",
+                role: "2",
+                telephone: "348383333",
+                password: passwordHash
+            }
+        ])
+
+        console.log("The collection of admin has been recreated with the database");
+
+        
     } catch (err) {
         console.log(err)
     }
@@ -220,33 +204,27 @@ const addUser = async () => {
 // create payment collection
 
 const addPayment = async () => {
-
+    
     try {
-
-        const defaultUser = "148381111";    // user signed in telephone number
-
-        const userDetails = await userModel.findOne({ telephone: defaultUser }).lean()     // take commune id to save in with user collection
         
-        console.log("userDetails", userDetails)
-
-        console.log("User _id is ", userDetails._id)
-
-        // console.log("Date.now", new Date().toISOString().split('T')[0])
-
+        const defaultUser = "148381111";    // user signed in telephone number
+        
+        const userDetails = await userModel.findOne({ telephone: defaultUser }).lean()     // take commune id to save in with user collection
+         
         await paymentModel.deleteMany({}).lean()
-
+        
         await paymentModel.insertMany([
-
+            
             {
                 userId: userDetails._id,
                 amount: "5",
                 paidon: new Date()
             }
         ])
-
+        
         console.log("The collection of Payment has been recreated with the database");
-
-
+        
+        
     } catch (err) {
         console.log(err)
     }
@@ -254,8 +232,10 @@ const addPayment = async () => {
 
 addAdmin();
 
-// addActivity();
+addActivity();
 
-// addCommune();
+addCommune();
 
-// setTimeout(function () { addUser() }, 3000);        // will wait to get updated activity/commune collection to avoid promise error
+setTimeout(function () { addUser() }, 3000);        // will wait to get updated activity/commune collection to avoid promise error
+
+setTimeout(function () { addPayment() }, 7000 );     // delay is to avoid any error collection
