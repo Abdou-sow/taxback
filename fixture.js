@@ -145,8 +145,8 @@ const addUser = async () => {
         await userModel.insertMany([
 
             {
-                surname: "macron",
-                firstname: "emmanualle",
+                surname: "john",
+                firstname: "alex",
                 dateofbirth: "2000/12/12",
                 address_personal: "12 elyse palace",
                 address_activity: "paris",
@@ -178,15 +178,15 @@ const addAdmin = async () => {
         await adminModel.insertMany([
 
             {
-                firstname: "gaelle",
-                surname: "petit",
+                firstname: "lean",
+                surname: "leandro",
                 role: "1",
                 telephone: "248382222",
                 password: passwordHash
             },
             {
-                firstname: "lean",
-                surname: "leandro",
+                firstname: "ahmed",
+                surname: "ahmed",
                 role: "2",
                 telephone: "348383333",
                 password: passwordHash

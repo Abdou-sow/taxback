@@ -7,11 +7,13 @@ const router = require('./Routes/taxRoutes');
 
 const { debug } = require('./Middleware/debug');
 
+const config = require('./Utiles/config')
+
 app.use(cors());
 app.use(express.json());
 
-// const port = config.port;
-const port = 9001;
+const port = config.port;
+// const port = 9001;
 
 
 // mongoose.connect(config.mongoURL, { useNewUrlParser: true }, { useUnifiedTopology: true }, (err) => {

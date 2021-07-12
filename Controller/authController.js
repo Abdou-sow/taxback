@@ -1,5 +1,4 @@
 const express = require('express');
-const router = express.Router();
 
 const { validationResult } = require('express-validator');  // to process error results
 
@@ -11,6 +10,8 @@ const activityModel = require('../Model/activityModel')
 const communeModel = require('../Model/communeModel');
 const paymentModel = require('../Model/paymentModel');
 const adminModel = require('../Model/adminModel');
+
+const config = require('../Utiles/config')
 
 const signupNewUser = (async (req, res, next) => {
 
@@ -79,7 +80,7 @@ const signupNewUser = (async (req, res, next) => {
                 const userAccountAdded = await paymentModel.insertMany([
                     {
                         userId: userAdded._id,
-                        amount: activityID.prix, 
+                        amount: activityID.prix,
                         paidon: new Date()
                     }
                 ])
@@ -111,7 +112,7 @@ const signupNewUser = (async (req, res, next) => {
 
 const login = (async (req, res) => {
 
-    const tokenExpire = "4h"      // setting for token expires in 4h
+    const tokenExpire = config.tokenExpire      // setting for token expires in 4h
 
     const userTelephone = req.body.telephone
     const userPassword = req.body.password
@@ -132,8 +133,8 @@ const login = (async (req, res) => {
 
                 const validToken = await jwt.sign({     // creates token using jwt with "secret" code and time to expires the token
                     id: validUser._id
-                }, "secret", {      // config.secret,   // when you connect with congig.js file use this
-                    expiresIn: tokenExpire       // token expiry time mentioned in const above
+                }, config.secret, {      // "secret",   // secret word from config.js file 
+                    expiresIn: tokenExpire       // token expiry time from config.js file
                 })
 
                 res.json({                                                                  // pass on login details to frontend for further process
@@ -146,7 +147,8 @@ const login = (async (req, res) => {
             } else {
 
                 res.status(400).json({
-                    message: `User ${userTelephone} login problem`
+                    message: `User ${userTelephone} login problem`,
+                    error
                 })
             }
 
@@ -161,7 +163,7 @@ const login = (async (req, res) => {
     } catch (error) {
 
         res.json({
-            message: `Error while login with user ${userTelephone}`,
+            message: `Telephone or Password incorrect`,
             error
         })
     }
@@ -250,7 +252,7 @@ const signupNewAdmin = (async (req, res, next) => {
 
 const loginAdmin = (async (req, res) => {
 
-    const tokenExpire = "4h"      // setting for token expires in 4h
+    const tokenExpire = config.tokenExpire      // setting for token expires in 4h
 
     const userTelephone = req.body.telephone
     const userPassword = req.body.password
@@ -275,6 +277,7 @@ const loginAdmin = (async (req, res) => {
 
                     const validToken = await jwt.sign({     // creates token using jwt with "secret" code and time to expires the token
                         id: validUser._id
+
                     }, "secret", {      // config.secret,   // when you connect with congig.js file use this
                         expiresIn: tokenExpire       // token expiry time mentioned in const above
                     })
@@ -289,7 +292,8 @@ const loginAdmin = (async (req, res) => {
                 } else {
 
                     res.json({
-                        message: `User ${userTelephone} login problem`
+                        message: `User ${userTelephone} login problem`,
+                        error
                     })
                 }
             } else {

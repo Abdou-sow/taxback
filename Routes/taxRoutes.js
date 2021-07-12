@@ -7,6 +7,8 @@ const { signupUserValidator } = require('../Middleware/signupUserValidator');
 
 const { signupAdminValidator } = require('../Middleware/signupAdminValidatore');
 
+const {verifyToken} = require('../Middleware/verifyToken');
+
 const
     {
         loginUserValidator,
